@@ -1,0 +1,83 @@
+/* Temporary fix for layout issues */
+.floating-shapes {
+    display: none !important;
+}
+
+.orbit-container {
+    display: none !important;
+}
+
+/* Ensure no horizontal overflow */
+* {
+    max-width: 100% !important;
+}
+
+body {
+    overflow-x: hidden !important;
+}
+
+.hero-container {
+    overflow: hidden !important;
+}
+
+/* Hero layout override - vertical stacking */
+.hero-container {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-12) !important;
+    text-align: center !important;
+}
+
+.hero-visual {
+    order: 2 !important;
+    height: auto !important;
+    margin-top: var(--space-8) !important;
+}
+
+.hero-content {
+    order: 1 !important;
+}
+
+/* Portrait styling v5 - Natural image display without any frame */
+.profile-photo {
+    width: 100% !important;
+    height: auto !important;
+    max-width: 400px !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    border: none !important;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.3s ease !important;
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+.profile-photo:hover {
+    transform: scale(1.02) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2) !important;
+}
+
+.profile-image {
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+}
+
+/* Remove all glow and frame effects */
+.image-glow {
+    display: none !important;
+}
+
+.hero-image-container {
+    position: relative !important;
+    z-index: 3 !important;
+    width: 100% !important;
+    max-width: 400px !important;
+    margin: 0 auto !important;
+}
