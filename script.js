@@ -1,185 +1,110 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Set current year in footer
-    document.getElementById('current-year').textContent = new Date().getFullYear();
+    // Theme switcher
+    const toggleSwitch = document.querySelector('#checkbox');
+    const themeLabel = document.querySelector('.theme-label');
     
-    // Theme toggle functionality
-    const themeToggle = document.getElementById('theme-toggle');
-    const body = document.body;
+    // Check for saved theme preference or use system preference
+    const currentTheme = localStorage.getItem('theme') || 
+                          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     
-    // Check for saved theme preference or use preferred color scheme
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme) {
-        body.className = savedTheme;
-    } else {
-        // Use preferred color scheme if available
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            body.className = 'dark-mode';
-        }
+    // Set initial theme
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    toggleSwitch.checked = currentTheme === 'dark';
+    themeLabel.textContent = currentTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    
+    // Toggle theme function
+    function switchTheme(e) {
+        const theme = e.target.checked ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+        themeLabel.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+        localStorage.setItem('theme', theme);
     }
     
-    // Theme toggle event listener
-    themeToggle.addEventListener('click', function() {
-        if (body.classList.contains('light-mode')) {
-            body.className = 'dark-mode';
-            localStorage.setItem('theme', 'dark-mode');
-        } else {
-            body.className = 'light-mode';
-            localStorage.setItem('theme', 'light-mode');
-        }
-    });
+    toggleSwitch.addEventListener('change', switchTheme, false);
     
-    // Mobile menu functionality
-    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-    const menu = document.querySelector('.menu');
+    // Mobile navigation toggle
+    const nav = document.querySelector('nav');
+    const burger = document.querySelector('.burger');
+    const navLinks = document.querySelector('.nav-links');
+    const navLinksLi = document.querySelectorAll('.nav-links li');
     
-    mobileMenuToggle.addEventListener('click', function() {
-        menu.classList.toggle('active');
-        mobileMenuToggle.classList.toggle('active');
+    burger.addEventListener('click', () => {
+        // Toggle navigation
+        navLinks.classList.toggle('nav-active');
         
-        // Toggle menu icon
-        if (menu.classList.contains('active')) {
-            mobileMenuToggle.innerHTML = '<i class="fas fa-times"></i>';
-        } else {
-            mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
-        }
+        // Animate links
+        navLinksLi.forEach((link, index) => {
+            if (link.style.animation) {
+                link.style.animation = '';
+            } else {
+                link.style.animation = `navLinkFade 0.5s ease forwards ${index / 7 + 0.3}s`;
+            }
+        });
+        
+        // Burger animation
+        burger.classList.toggle('toggle');
     });
     
-    // Close mobile menu when clicking a link
-    const menuLinks = document.querySelectorAll('.menu a');
-    menuLinks.forEach(link => {
+    // Close mobile menu when clicking a nav link
+    navLinksLi.forEach(link => {
         link.addEventListener('click', () => {
-            menu.classList.remove('active');
-            mobileMenuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+            navLinks.classList.remove('nav-active');
+            burger.classList.remove('toggle');
+            
+            navLinksLi.forEach(link => {
+                link.style.animation = '';
+            });
         });
     });
     
-    // Smooth scroll and active nav highlighting
-    const sections = document.querySelectorAll('section');
-    const navLinks = document.querySelectorAll('.menu a');
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 100) {
+            nav.classList.add('scrolled-nav');
+        } else {
+            nav.classList.remove('scrolled-nav');
+        }
+    });
     
-    // Highlight active nav item on scroll
-    function highlightActiveNavItem() {
-        let scrollPosition = window.scrollY + 100;
+    // Scroll animations
+    function animateOnScroll() {
+        const animatedElements = document.querySelectorAll('.animate-on-scroll');
         
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute('id');
+        animatedElements.forEach(element => {
+            const elementPosition = element.getBoundingClientRect().top;
+            const windowHeight = window.innerHeight;
             
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                navLinks.forEach(link => {
-                    link.classList.remove('active');
-                    if (link.getAttribute('href') === '#' + sectionId) {
-                        link.classList.add('active');
-                    }
-                });
+            if (elementPosition < windowHeight - 100) {
+                element.classList.add('fade-in');
             }
         });
     }
     
-    window.addEventListener('scroll', highlightActiveNavItem);
-    
-    // Header scroll behavior
-    const header = document.querySelector('header');
-    let lastScrollTop = 0;
-    
-    window.addEventListener('scroll', function() {
-        const scrollTop = window.scrollY;
-        
-        if (scrollTop > 100) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
-        }
-        
-        lastScrollTop = scrollTop;
-    });
-    
-    // Form submission
-    const contactForm = document.querySelector('.contact-form form');
+    // Form submission handling
+    const contactForm = document.getElementById('contact-form');
     if (contactForm) {
         contactForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            // In a real implementation, you would send the form data to a server
             
-            const submitBtn = contactForm.querySelector('button[type="submit"]');
-            const originalText = submitBtn.textContent;
+            // Get form values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const subject = document.getElementById('subject').value;
+            const message = document.getElementById('message').value;
             
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending...';
+            // Here you would typically send this data to a server
+            // For now, just log it to console and show a success message
+            console.log('Form submitted:', { name, email, subject, message });
             
-            // Simulate form submission
-            setTimeout(() => {
-                const formElements = contactForm.elements;
-                
-                // Reset form
-                contactForm.reset();
-                
-                // Create success message
-                const successMsg = document.createElement('div');
-                successMsg.className = 'success-message';
-                successMsg.textContent = 'Thank you for your message! I will get back to you soon.';
-                
-                // Style the success message based on theme
-                if (body.classList.contains('light-mode')) {
-                    successMsg.style.backgroundColor = '#e8f5e9';
-                    successMsg.style.color = '#2e7d32';
-                } else {
-                    successMsg.style.backgroundColor = '#1b5e20';
-                    successMsg.style.color = '#e8f5e9';
-                }
-                
-                successMsg.style.padding = '15px';
-                successMsg.style.borderRadius = 'var(--border-radius)';
-                successMsg.style.marginTop = '20px';
-                successMsg.style.textAlign = 'center';
-                
-                // Add success message after form
-                contactForm.parentNode.appendChild(successMsg);
-                
-                // Reset button
-                submitBtn.disabled = false;
-                submitBtn.textContent = originalText;
-                
-                // Remove success message after 5 seconds
-                setTimeout(() => {
-                    successMsg.remove();
-                }, 5000);
-                
-            }, 1500);
+            // Show success message (in a real implementation, you'd show this after successful AJAX)
+            alert('Thank you for your message! I will get back to you soon.');
+            
+            // Reset the form
+            contactForm.reset();
         });
     }
     
-    // Animate elements when they come into view
-    const animateOnScroll = function() {
-        const elements = document.querySelectorAll('.project-card, .skill-category, .publication, .timeline-item');
-        
-        elements.forEach(element => {
-            const elementPosition = element.getBoundingClientRect().top;
-            const screenPosition = window.innerHeight;
-            
-            if (elementPosition < screenPosition - 100) {
-                element.classList.add('visible');
-            }
-        });
-    }
-    
-    // Add initial CSS for animations
-    const styleElement = document.createElement('style');
-    styleElement.textContent = `
-        .project-card, .skill-category, .publication, .timeline-item {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-        
-        .project-card.visible, .skill-category.visible, .publication.visible, .timeline-item.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    `;
-    document.head.appendChild(styleElement);
-    
+    // Initialize animations on page load
     window.addEventListener('scroll', animateOnScroll);
     animateOnScroll(); // Run once on page load
 });
