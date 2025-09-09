@@ -3,342 +3,236 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hamid Haghmoradi | Quantum Physicist</title>
+    <title>Hamid Haghmoradi | Quantum Force Metrology</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="description" content="Hamid Haghmoradi - Doctoral Researcher in Quantum Force Metrology and VCQ Fellow at TU Wien">
 </head>
-<body>
-    <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="checkbox">
-            <input type="checkbox" id="checkbox" />
-            <div class="slider round"></div>
-        </label>
-        <span class="theme-label">Dark Mode</span>
-    </div>
-
-    <header class="hero">
+<body class="light-mode">
+    <header>
         <nav>
-            <div class="logo">HH</div>
-            <ul class="nav-links">
+            <div class="logo">
+                <a href="#home">HH</a>
+            </div>
+            <ul class="menu">
                 <li><a href="#about">About</a></li>
-                <li><a href="#expertise">Expertise</a></li>
                 <li><a href="#research">Research</a></li>
-                <li><a href="#projects">Projects</a></li>
+                <li><a href="#expertise">Expertise</a></li>
+                <li><a href="#publications">Publications</a></li>
+                <li><a href="#education">Background</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
-            <div class="burger">
-                <div class="line1"></div>
-                <div class="line2"></div>
-                <div class="line3"></div>
-            </div>
+            <button id="theme-toggle" aria-label="Toggle dark mode">
+                <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
+            </button>
+            <button id="mobile-menu-toggle" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
         </nav>
-
-        <div class="hero-content">
-            <h1 class="animate-on-scroll fade-in">Hamid Haghmoradi</h1>
-            <h2 class="animate-on-scroll fade-in">Quantum Force Metrology</h2>
-            <p class="animate-on-scroll fade-in">Exploring the quantum vacuum to pioneer next-generation technologies</p>
-            <div class="hero-cta animate-on-scroll fade-in">
-                <a href="#contact" class="btn primary-btn">Get in Touch</a>
-                <a href="#expertise" class="btn secondary-btn">Discover My Work</a>
-            </div>
-        </div>
     </header>
 
-    <section id="about" class="section">
+    <section id="home" class="hero">
         <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">About Me</h2>
+            <h1>Hamid Haghmoradi</h1>
+            <h2>Quantum Force Metrology Researcher</h2>
+            <p>Exploring the quantum vacuum at the frontiers of physics and technology</p>
+            <div class="cta-buttons">
+                <a href="#research" class="button primary">My Research</a>
+                <a href="#contact" class="button secondary">Get in Touch</a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="about">
+        <div class="container">
+            <h2>About Me</h2>
             <div class="about-content">
-                <div class="about-image animate-on-scroll slide-in-left">
-                    <div class="image-placeholder">
-                        <!-- Replace with your actual image -->
-                        <i class="fas fa-user-circle"></i>
-                    </div>
+                <div class="about-text">
+                    <p>I'm a Doctoral Researcher at TU Wien's Atominstitut and a Vienna Center for Quantum Science and Technology (VCQ) Fellow specializing in Casimir force metrology and quantum vacuum interactions.</p>
+                    <p>My research focuses on developing ultra-precise measurement techniques to explore fundamental quantum forces and their technological applications. I work at the intersection of quantum physics, precision metrology, and advanced instrumentation.</p>
+                    <p>With extensive experience in laser systems, interferometry, and nanoscale sensing, I'm passionate about translating fundamental research into innovative solutions.</p>
                 </div>
-                <div class="about-text animate-on-scroll slide-in-right">
-                    <p>I'm a Doctoral Researcher at TU Wien's Atominstitut and a VCQ Fellow, specializing in Casimir force metrology and quantum vacuum interactions. My research focuses on precision measurements at the quantum level, exploring fundamental physics with potential applications in next-generation sensing technologies.</p>
-                    <p>With expertise in experimental physics, nanoscale force detection, and optical metrology, I bridge the gap between fundamental quantum research and practical applications in sensing and measurement technology.</p>
-                    <div class="about-details">
-                        <div class="detail">
-                            <i class="fas fa-graduation-cap"></i>
-                            <span>Ph.D. in Physics, TU Wien (2023-Present)</span>
-                        </div>
-                        <div class="detail">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>Vienna, Austria</span>
-                        </div>
-                        <div class="detail">
-                            <i class="fas fa-atom"></i>
-                            <span>Quantum Force Metrology Specialist</span>
-                        </div>
-                    </div>
+                <div class="profile-image">
+                    <img src="https://via.placeholder.com/400x400" alt="Hamid Haghmoradi" id="profile-image">
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="expertise" class="section bg-alt">
+    <section id="research" class="research">
         <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">Core Expertise</h2>
-            <div class="expertise-grid">
-                <div class="expertise-card animate-on-scroll fade-in">
-                    <div class="expertise-icon">
-                        <i class="fas fa-microscope"></i>
-                    </div>
-                    <h3>Quantum Metrology</h3>
-                    <p>Developing ultra-precise measurement techniques for quantum-scale forces and interactions.</p>
-                </div>
-                <div class="expertise-card animate-on-scroll fade-in">
-                    <div class="expertise-icon">
-                        <i class="fas fa-laser"></i>
-                    </div>
-                    <h3>Optical Systems</h3>
-                    <p>Design and implementation of advanced laser systems and interferometry for sub-nanometer measurements.</p>
-                </div>
-                <div class="expertise-card animate-on-scroll fade-in">
-                    <div class="expertise-icon">
-                        <i class="fas fa-cog"></i>
-                    </div>
-                    <h3>Precision Engineering</h3>
-                    <p>Creating sophisticated experimental setups with thermal control and seismic isolation.</p>
-                </div>
-                <div class="expertise-card animate-on-scroll fade-in">
-                    <div class="expertise-icon">
-                        <i class="fas fa-laptop-code"></i>
-                    </div>
-                    <h3>Simulation & Modeling</h3>
-                    <p>Expert in COMSOL, FDTD, and scientific programming for complex physical systems.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="research" class="section">
-        <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">Research Highlights</h2>
-            <div class="research-timeline">
-                <div class="timeline-item animate-on-scroll slide-in-left">
-                    <div class="timeline-content">
-                        <span class="date">2023 - Present</span>
-                        <h3>Casimir Force Metrology</h3>
-                        <p>Leading the development of a state-of-the-art Casimir force measurement setup with sub-nanometer resolution, enabling new insights into quantum vacuum effects.</p>
-                        <div class="tech-tags">
-                            <span>Fabry–Pérot Interferometry</span>
-                            <span>Seismic Isolation</span>
-                            <span>Thermal Control</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="timeline-item animate-on-scroll slide-in-right">
-                    <div class="timeline-content">
-                        <span class="date">2020 - 2023</span>
-                        <h3>Medical Physics Applications</h3>
-                        <p>Developed simulations for tumor treating fields (TTF) using dielectric modeling and 3D MRI segmentation, contributing to improved cancer treatment approaches.</p>
-                        <div class="tech-tags">
-                            <span>3D Modeling</span>
-                            <span>Medical Imaging</span>
-                            <span>Treatment Optimization</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="timeline-item animate-on-scroll slide-in-left">
-                    <div class="timeline-content">
-                        <span class="date">2017 - 2020</span>
-                        <h3>Laser System Development</h3>
-                        <p>Designed and built a tunable fiber laser system with second harmonic generation for spectroscopy applications, achieving 1.8W green laser output.</p>
-                        <div class="tech-tags">
-                            <span>Nonlinear Optics</span>
-                            <span>Fiber Lasers</span>
-                            <span>Cavity Design</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="projects" class="section bg-alt">
-        <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">Featured Projects</h2>
+            <h2>Research & Projects</h2>
             <div class="project-grid">
-                <div class="project-card animate-on-scroll fade-in">
-                    <div class="project-image">
-                        <div class="image-placeholder">
-                            <i class="fas fa-atom"></i>
-                        </div>
+                <div class="project-card">
+                    <div class="project-icon">
+                        <i class="fas fa-atom"></i>
                     </div>
-                    <div class="project-info">
-                        <h3>CANNEX Project</h3>
-                        <p>Developing next-generation Casimir force measurement techniques with applications in quantum sensing and fundamental physics tests.</p>
-                        <div class="project-links">
-                            <a href="#" class="btn small-btn">Learn More</a>
-                        </div>
-                    </div>
+                    <h3>CANNEX Project</h3>
+                    <p>Developing state-of-the-art Casimir force metrology using plane-parallel plate geometry, with sub-nanometer resolution and precision environmental control.</p>
                 </div>
-                <div class="project-card animate-on-scroll fade-in">
-                    <div class="project-image">
-                        <div class="image-placeholder">
-                            <i class="fas fa-laser"></i>
-                        </div>
+                <div class="project-card">
+                    <div class="project-icon">
+                        <i class="fas fa-wave-square"></i>
                     </div>
-                    <div class="project-info">
-                        <h3>High-Power Green Laser System</h3>
-                        <p>Developed a 1.8W continuous green laser via SHG in bow-tie cavity for precision spectroscopy applications.</p>
-                        <div class="project-links">
-                            <a href="#" class="btn small-btn">Publication</a>
-                        </div>
-                    </div>
+                    <h3>Seismic Isolation Systems</h3>
+                    <p>Designed six-axis isolation systems using GAS filters and inverted pendulums for ultra-sensitive quantum measurements.</p>
                 </div>
-                <div class="project-card animate-on-scroll fade-in">
-                    <div class="project-image">
-                        <div class="image-placeholder">
-                            <i class="fas fa-wave-square"></i>
-                        </div>
+                <div class="project-card">
+                    <div class="project-icon">
+                        <i class="fas fa-temperature-low"></i>
                     </div>
-                    <div class="project-info">
-                        <h3>Quantum Vacuum Interactions</h3>
-                        <p>Investigating fluctuation-induced optomechanical forces with potential for novel sensing technologies and quantum control.</p>
-                        <div class="project-links">
-                            <a href="#" class="btn small-btn">Research Details</a>
-                        </div>
+                    <h3>Thermal Control Systems</h3>
+                    <p>Created active thermal shielding with radiative blackbody control achieving temperature stability below 0.3 mK.</p>
+                </div>
+                <div class="project-card">
+                    <div class="project-icon">
+                        <i class="fas fa-laser-pointer"></i>
                     </div>
+                    <h3>Advanced Laser Systems</h3>
+                    <p>Built tunable fiber lasers and high-power SHG systems for spectroscopy and precision measurements.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="education" class="section">
+    <section id="expertise" class="expertise">
         <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">Education & Training</h2>
-            <div class="education-cards">
-                <div class="education-card animate-on-scroll slide-in-left">
-                    <div class="education-header">
-                        <i class="fas fa-graduation-cap"></i>
-                        <h3>Ph.D. in Physics</h3>
-                    </div>
-                    <p class="institution">TU Wien, Atominstitut</p>
-                    <p class="period">2023 - Present</p>
-                    <p class="description">Specializing in Casimir force metrology, quantum vacuum interactions, and quantum gravity.</p>
-                </div>
-                <div class="education-card animate-on-scroll slide-in-right">
-                    <div class="education-header">
-                        <i class="fas fa-graduation-cap"></i>
-                        <h3>M.Sc. in Photonics</h3>
-                    </div>
-                    <p class="institution">Shahid Beheshti University</p>
-                    <p class="period">2017 - 2020</p>
-                    <p class="description">Designed and fabricated a high-power continuous green fiber laser via SHG in bow-tie cavity.</p>
-                </div>
-                <div class="education-card animate-on-scroll slide-in-left">
-                    <div class="education-header">
-                        <i class="fas fa-certificate"></i>
-                        <h3>VCQ Summer School</h3>
-                    </div>
-                    <p class="institution">Vienna Center for Quantum Science and Technology</p>
-                    <p class="period">2024</p>
-                    <p class="description">Advanced training in quantum science and technology applications.</p>
-                </div>
-                <div class="education-card animate-on-scroll slide-in-right">
-                    <div class="education-header">
-                        <i class="fas fa-certificate"></i>
-                        <h3>Quantum Machine Learning</h3>
-                    </div>
-                    <p class="institution">University of Vienna</p>
-                    <p class="period">2025</p>
-                    <p class="description">Specialized training in quantum approaches to machine learning algorithms.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="skills" class="section bg-alt">
-        <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">Technical Skills</h2>
+            <h2>Skills & Expertise</h2>
             <div class="skills-container">
-                <div class="skills-category animate-on-scroll fade-in">
+                <div class="skill-category">
                     <h3>Experimental Techniques</h3>
-                    <div class="skill-tags">
-                        <span>Interferometry</span>
-                        <span>Seismic Isolation</span>
-                        <span>Thermal Control Systems</span>
-                        <span>Plasma Cleaning</span>
-                        <span>KPFM Integration</span>
-                        <span>Fabry-Pérot Systems</span>
-                        <span>Laser Development</span>
-                    </div>
+                    <ul class="skill-list">
+                        <li>Plane-parallel Casimir alignment</li>
+                        <li>Fabry-Pérot interferometry</li>
+                        <li>UV/Ar+ ion plasma cleaning</li>
+                        <li>Seismic isolation systems</li>
+                        <li>Thermal control (<1 mK)</li>
+                        <li>KPFM and patch potential mapping</li>
+                    </ul>
                 </div>
-                <div class="skills-category animate-on-scroll fade-in">
+                <div class="skill-category">
                     <h3>Software & Modeling</h3>
-                    <div class="skill-tags">
-                        <span>COMSOL Multiphysics</span>
-                        <span>Lumerical FDTD</span>
-                        <span>Zemax Optics</span>
-                        <span>SolidWorks</span>
-                        <span>Inventor</span>
-                        <span>Python</span>
-                        <span>MATLAB</span>
-                        <span>C/C++</span>
-                        <span>Mathematica</span>
+                    <ul class="skill-list">
+                        <li>COMSOL Multiphysics</li>
+                        <li>Lumerical FDTD</li>
+                        <li>Zemax Optics Studio</li>
+                        <li>CAD: Inventor, SolidWorks</li>
+                        <li>Python, MATLAB, Mathematica</li>
+                        <li>C, C++</li>
+                    </ul>
+                </div>
+                <div class="skill-category">
+                    <h3>Research Domains</h3>
+                    <ul class="skill-list">
+                        <li>Quantum force metrology</li>
+                        <li>Precision instrumentation</li>
+                        <li>Nonlinear optics</li>
+                        <li>Laser system design</li>
+                        <li>Vacuum technologies</li>
+                        <li>Data acquisition systems</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="publications" class="publications">
+        <div class="container">
+            <h2>Publications & Presentations</h2>
+            <div class="publication-list">
+                <div class="publication">
+                    <h3>Force Metrology with Plane Parallel Plates: Final Design Review and Outlook</h3>
+                    <p class="pub-meta">Physics (MDPI), 6(2), 690–741 (2024)</p>
+                    <p>Comprehensive review of advanced force metrology techniques using plane parallel plates for quantum vacuum force measurements.</p>
+                    <a href="#" class="read-more">DOI: 10.3390/physics6020045</a>
+                </div>
+                <div class="publication">
+                    <h3>1.8 W Green Laser at 532 nm via Passive Resonant Enhancement</h3>
+                    <p class="pub-meta">IJOP 14(1), (2020)</p>
+                    <p>Development of high-power green laser system using second harmonic generation in a bow-tie cavity.</p>
+                    <a href="#" class="read-more">DOI: 10.29252/ijop.14.1.67</a>
+                </div>
+                <div class="publication">
+                    <h3>Tunable 1064/532 nm Fiber Laser for Spectroscopy</h3>
+                    <p class="pub-meta">ICOP & ICPET Conference (2020)</p>
+                    <p>Design and implementation of a dual-wavelength tunable fiber laser system for advanced spectroscopic applications.</p>
+                    <a href="#" class="read-more">View Presentation</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="education" class="education">
+        <div class="container">
+            <h2>Education & Experience</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2023 - Present</div>
+                    <div class="timeline-content">
+                        <h3>Ph.D. in Physics</h3>
+                        <p>TU Wien, Atominstitut, Austria</p>
+                        <p>Specialization: Casimir force metrology, quantum vacuum interactions, quantum gravity</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2023 - Present</div>
+                    <div class="timeline-content">
+                        <h3>Project Assistant</h3>
+                        <p>FWF, TU Wien</p>
+                        <p>Design and fabrication of state-of-the-art Casimir and non-Newtonian experimental setup</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2022</div>
+                    <div class="timeline-content">
+                        <h3>Technical Manager</h3>
+                        <p>Optic Pardaz Co., Tehran</p>
+                        <p>Technical review of optical and laser systems for clinical and research applications</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-date">2017 - 2020</div>
+                    <div class="timeline-content">
+                        <h3>M.Sc. in Photonics</h3>
+                        <p>Shahid Beheshti University, Tehran, Iran</p>
+                        <p>Thesis: Design and fabrication of a high-power continuous green fiber laser via SHG in bow-tie cavity</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section id="publications" class="section">
+    <section id="contact" class="contact">
         <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">Publications</h2>
-            <div class="publication-list">
-                <div class="publication-card animate-on-scroll fade-in">
-                    <h3>Force Metrology with Plane Parallel Plates: Final Design Review and Outlook</h3>
-                    <p class="authors">Haghmoradi, H., et al.</p>
-                    <p class="journal">Physics (MDPI), 6(2), 690–741 (2024)</p>
-                    <p class="doi">DOI: 10.3390/physics6020045</p>
-                    <a href="#" class="btn small-btn">View Publication</a>
-                </div>
-                <div class="publication-card animate-on-scroll fade-in">
-                    <h3>1.8 W Green Laser at 532 nm via Passive Resonant Enhancement</h3>
-                    <p class="authors">Haghmoradi, H., et al.</p>
-                    <p class="journal">IJOP 14(1) (2020)</p>
-                    <p class="doi">DOI: 10.29252/ijop.14.1.67</p>
-                    <a href="#" class="btn small-btn">View Publication</a>
-                </div>
-                <div class="publication-card animate-on-scroll fade-in">
-                    <h3>Tunable 1064/532 nm Fiber Laser for Spectroscopy</h3>
-                    <p class="authors">Haghmoradi, H., et al.</p>
-                    <p class="journal">ICOP & ICPET Conference (2020)</p>
-                    <a href="#" class="btn small-btn">View Publication</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="contact" class="section bg-alt">
-        <div class="container">
-            <h2 class="section-title animate-on-scroll fade-in">Contact</h2>
-            <div class="contact-container">
-                <div class="contact-info animate-on-scroll slide-in-left">
+            <h2>Get in Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
                     <div class="contact-item">
                         <i class="fas fa-envelope"></i>
-                        <a href="mailto:hamid.haghmoradi@tuwien.ac.at">hamid.haghmoradi@tuwien.ac.at</a>
+                        <p>hamid.haghmoradi@tuwien.ac.at</p>
                     </div>
                     <div class="contact-item">
                         <i class="fas fa-phone"></i>
-                        <a href="tel:+43677614914590">+43 677 61491459</a>
+                        <p>+43 677 61491459</p>
                     </div>
                     <div class="contact-item">
-                        <i class="fab fa-linkedin"></i>
-                        <a href="https://linkedin.com/in/hamid-haghmoradi" target="_blank">LinkedIn</a>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <p>Vienna, Austria</p>
                     </div>
-                    <div class="contact-item">
-                        <i class="fab fa-github"></i>
-                        <a href="https://github.com/HamidHaghmoradi" target="_blank">GitHub</a>
+                    <div class="social-links">
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                        <a href="#" aria-label="ResearchGate"><i class="fab fa-researchgate"></i></a>
                     </div>
                 </div>
-                <div class="contact-form animate-on-scroll slide-in-right">
-                    <form id="contact-form">
+                <div class="contact-form">
+                    <form>
                         <div class="form-group">
                             <label for="name">Name</label>
                             <input type="text" id="name" name="name" required>
@@ -349,42 +243,45 @@
                         </div>
                         <div class="form-group">
                             <label for="subject">Subject</label>
-                            <input type="text" id="subject" name="subject" required>
+                            <input type="text" id="subject" name="subject">
                         </div>
                         <div class="form-group">
                             <label for="message">Message</label>
-                            <textarea id="message" name="message" rows="4" required></textarea>
+                            <textarea id="message" name="message" required></textarea>
                         </div>
-                        <button type="submit" class="btn primary-btn">Send Message</button>
+                        <button type="submit" class="button primary">Send Message</button>
                     </form>
                 </div>
             </div>
         </div>
     </section>
 
-    <footer class="footer">
+    <footer>
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
-                    <div class="logo">HH</div>
-                    <p>Quantum Physicist | Entrepreneur</p>
+                    <p>Hamid Haghmoradi</p>
+                    <p class="tagline">Quantum Force Metrology Researcher</p>
                 </div>
                 <div class="footer-links">
-                    <ul>
-                        <li><a href="#about">About</a></li>
-                        <li><a href="#expertise">Expertise</a></li>
-                        <li><a href="#research">Research</a></li>
-                        <li><a href="#projects">Projects</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
+                    <a href="#about">About</a>
+                    <a href="#research">Research</a>
+                    <a href="#expertise">Expertise</a>
+                    <a href="#publications">Publications</a>
+                    <a href="#education">Background</a>
+                    <a href="#contact">Contact</a>
+                </div>
+                <div class="footer-affiliations">
+                    <p>Vienna Center for Quantum Science and Technology (VCQ)</p>
+                    <p>TU Wien, Atominstitut</p>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Hamid Haghmoradi. All rights reserved.</p>
+            <div class="copyright">
+                <p>&copy; <span id="current-year"></span> Hamid Haghmoradi. All rights reserved.</p>
             </div>
         </div>
     </footer>
-
+    
     <script src="script.js"></script>
 </body>
 </html>
