@@ -1,8 +1,18 @@
 /* Modern Navigation Bar */
 .nav {
     position: fixed !important;
+    .logo:hover {
+    transform: scale(1.01) !important;
+}
+
+.logo:hover .logo-icon {
+    transform: scale(1.05) rotate(5deg) !important;
+    filter: drop-shadow(0 8px 24px rgba(0, 122, 255, 0.45)) !important;
+}
+
+.nav {
+    position: fixed !important;
     top: 0 !important;
-    left: 0 !important;
     right: 0 !important;
     background: rgba(255, 255, 255, 0.95) !important;
     backdrop-filter: blur(24px) !important;
@@ -36,10 +46,10 @@
 }
 
 .logo-icon {
-    width: 3.5rem !important;
-    height: 3.5rem !important;
+    width: 6rem !important;
+    height: 6rem !important;
     transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
-    filter: drop-shadow(0 3px 12px rgba(0, 122, 255, 0.25)) !important;
+    filter: drop-shadow(0 4px 16px rgba(0, 122, 255, 0.3)) !important;
     flex-shrink: 0 !important;
 }
 
@@ -51,17 +61,31 @@
     font-size: 1.75rem !important;
     font-weight: 700 !important;
     letter-spacing: -0.025em !important;
-    line-height: 1.2 !important;
-    margin-left: 0.5rem !important;
+    line-height: 1.1 !important;
+    margin-left: 0.75rem !important;
 }
 
+/* Perfect alignment for logo container */
+.logo {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    letter-spacing: -0.02em !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+/* Enhanced hover effects for larger logo */
 .logo:hover {
-    transform: scale(1.02) !important;
+    transform: scale(1.01) !important;
 }
 
 .logo:hover .logo-icon {
-    transform: scale(1.08) rotate(8deg) !important;
-    filter: drop-shadow(0 6px 20px rgba(0, 122, 255, 0.4)) !important;
+    transform: scale(1.06) rotate(6deg) !important;
+    filter: drop-shadow(0 8px 24px rgba(0, 122, 255, 0.45)) !important;
 }
 
 .logo:hover .logo-text {
@@ -70,6 +94,17 @@
     -webkit-text-fill-color: transparent !important;
     background-clip: text !important;
     transform: translateY(-1px) !important;
+}
+
+/* Enhanced navigation container for larger logo */
+.nav-container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 var(--space-6) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 7rem !important;
 }
 
 .nav-menu {
@@ -82,6 +117,7 @@
     border: 1px solid rgba(0, 122, 255, 0.15) !important;
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
+    flex-shrink: 0 !important;
 }
 
 .nav-link {
@@ -157,18 +193,19 @@
     }
     
     .logo {
-        gap: 0.6rem !important;
-        font-size: 1.5rem !important;
+        gap: 0.8rem !important;
+        font-size: 1.8rem !important;
+        max-width: 70% !important;
     }
     
     .logo-icon {
-        width: 3rem !important;
-        height: 3rem !important;
+        width: 4rem !important;
+        height: 4rem !important;
     }
     
     .logo-text {
-        font-size: 1.5rem !important;
-        margin-left: 0.4rem !important;
+        font-size: 1.8rem !important;
+        margin-left: 0.6rem !important;
     }
 }
 
@@ -259,34 +296,46 @@ body {
 /* Enhanced logo responsive adjustments */
 @media (max-width: 768px) {
     .logo-icon {
-        width: 3rem !important;
-        height: 3rem !important;
+        width: 4.5rem !important;
+        height: 4.5rem !important;
     }
     
     .logo-text {
-        font-size: 1.5rem !important;
-        margin-left: 0.4rem !important;
+        font-size: 1.75rem !important;
+        margin-left: 0.6rem !important;
     }
     
     .logo {
         font-size: 1.5rem !important;
-        gap: 0.6rem !important;
+        gap: 0.8rem !important;
+        max-width: 70% !important;
+    }
+    
+    .nav-container {
+        height: 6rem !important;
+        gap: 1.5rem !important;
     }
 }
 
 @media (max-width: 480px) {
     .logo-icon {
-        width: 2.75rem !important;
-        height: 2.75rem !important;
+        width: 4rem !important;
+        height: 4rem !important;
     }
     
     .logo-text {
-        font-size: 1.4rem !important;
-        margin-left: 0.3rem !important;
+        font-size: 1.75rem !important;
+        margin-left: 0.5rem !important;
     }
     
     .logo {
-        font-size: 1.4rem !important;
-        gap: 0.5rem !important;
+        font-size: 1.5rem !important;
+        gap: 0.6rem !important;
+        max-width: 75% !important;
+    }
+    
+    .nav-container {
+        height: 5.5rem !important;
+        gap: 1rem !important;
     }
 }
