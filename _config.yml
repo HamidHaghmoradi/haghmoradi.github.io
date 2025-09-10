@@ -1,0 +1,19 @@
+# GitHub Pages Configuration
+# Force HTTPS redirect
+enforce_ssl: haghmoradi.com
+
+# Basic Jekyll configuration
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+
+# Security headers
+plugins:
+  - jekyll-redirect-from
+
+# Custom domain
+url: "https://haghmoradi.com"
+baseurl: ""
+
+# Repository information
+repository: "HamidHaghmoradi/haghmoradi.github.io"
