@@ -26,18 +26,39 @@
 .logo {
     font-size: 1.5rem !important;
     font-weight: 700 !important;
-    background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #007AFF 100%) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    background-clip: text !important;
     text-decoration: none !important;
     transition: all 0.3s ease !important;
     letter-spacing: -0.02em !important;
     position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+}
+
+.logo-icon {
+    width: 2.5rem !important;
+    height: 2.5rem !important;
+    transition: all 0.3s ease !important;
+    filter: drop-shadow(0 2px 8px rgba(0, 122, 255, 0.2)) !important;
+}
+
+.logo-text {
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #007AFF 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 .logo:hover {
     transform: scale(1.02) !important;
+}
+
+.logo:hover .logo-icon {
+    transform: scale(1.1) rotate(5deg) !important;
+    filter: drop-shadow(0 4px 16px rgba(0, 122, 255, 0.4)) !important;
+}
+
+.logo:hover .logo-text {
     filter: brightness(1.1) !important;
 }
 
@@ -123,6 +144,19 @@
     
     .nav-toggle {
         display: flex !important;
+    }
+    
+    .logo {
+        gap: 0.5rem !important;
+    }
+    
+    .logo-icon {
+        width: 2rem !important;
+        height: 2rem !important;
+    }
+    
+    .logo-text {
+        font-size: 1.25rem !important;
     }
 }
 
