@@ -7,15 +7,15 @@
     <meta name="description" content="Doctoral Researcher in Quantum Force Metrology">
     
     <!-- Enhanced Favicon Support -->
-    <link rel="icon" type="image/svg+xml" href="images/favicon.svg">
-    <link rel="icon" type="image/svg+xml" sizes="32x32" href="images/favicon.svg">
-    <link rel="icon" type="image/svg+xml" sizes="16x16" href="images/favicon-16x16.svg">
-    <link rel="alternate icon" href="images/favicon.svg">
-    <link rel="mask-icon" href="images/favicon.svg" color="#007AFF">
-    <link rel="apple-touch-icon" href="images/favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="images/Logo.svg">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="images/Logo.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="images/Logo.png">
+    <link rel="alternate icon" href="images/Logo.svg">
+    <link rel="mask-icon" href="images/Logo.svg" color="#007AFF">
+    <link rel="apple-touch-icon" href="images/Logo.png">
     <meta name="theme-color" content="#007AFF">
     <meta name="msapplication-TileColor" content="#007AFF">
-    <meta name="msapplication-TileImage" content="images/favicon.svg">
+    <meta name="msapplication-TileImage" content="images/Logo.png">
     <link rel="manifest" href="manifest.json">
     
     <link rel="stylesheet" href="styles/main.css">
@@ -23,7 +23,24 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="custom_editor_styles.css">\n</head>
+    <link rel="stylesheet" href="custom_editor_styles.css?v=2.1">
+    <style>
+        /* Profile photo fix - ensure head is fully visible */
+        .hero-visual .hero-image-container .profile-image {
+            width: 400px !important;
+            height: 400px !important;
+        }
+        
+        .hero-visual .hero-image-container .profile-image .profile-photo {
+            object-position: center top !important;
+            transform: scale(1) translateY(0px) !important;
+            object-fit: cover !important;
+        }
+        
+        .hero-visual .hero-image-container .profile-image:hover .profile-photo {
+            transform: scale(1.05) translateY(0px) !important;
+        }
+    </style>\n</head>
 <body>
     <!-- Navigation -->
     <nav class="nav">
@@ -438,13 +455,15 @@
                             </div>
                             <span>hamid.haghmoradi@tuwien.ac.at</span>
                         </a>
-                        <a href="tel:+4367761491459" class="contact-method">
+                        <a href="https://www.researchgate.net/profile/Hamid-Haghmoradi?ev=hdr_xprf" class="contact-method" target="_blank">
                             <div class="method-icon">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M4 2a2 2 0 00-2 2v16a2 2 0 002 2h16a2 2 0 002-2V4a2 2 0 00-2-2H4z" stroke="currentColor" stroke-width="2"/>
+                                    <path d="M8 8h8m-8 4h8m-8 4h4" stroke="currentColor" stroke-width="2"/>
+                                    <circle cx="6" cy="6" r="1" fill="currentColor"/>
                                 </svg>
                             </div>
-                            <span>+43 677 61491459</span>
+                            <span>ResearchGate</span>
                         </a>
                         <a href="https://www.linkedin.com/in/hamid-haghmoradi-17b76415b/" class="contact-method" target="_blank">
                             <div class="method-icon">

@@ -21,6 +21,27 @@
 
 /* Image customizations */
 
+/* Profile photo positioning fix - ensure head is fully visible */
+.hero-visual .hero-image-container .profile-image .profile-photo {
+    object-position: center top !important;
+    transform: scale(0.85) translateY(10px) !important;
+    object-fit: cover !important;
+}
+
+.hero-visual .hero-image-container .profile-image:hover .profile-photo {
+    transform: scale(0.9) translateY(10px) !important;
+}
+
+/* Additional specificity for profile photo positioning */
+.profile-image .profile-photo {
+    object-position: center top !important;
+    transform: scale(0.85) translateY(10px) !important;
+}
+
+.profile-image:hover .profile-photo {
+    transform: scale(0.9) translateY(10px) !important;
+}
+
 /* Custom CSS from editor */
 /* Example custom CSS - modify as needed */
 
