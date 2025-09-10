@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 Enhanced Visual Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow-x: hidden;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 320px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .edit-toggle {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .edit-toggle.active {
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            margin: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Enhanced Editable Styles */
+        .editable {
+            outline: none;
+            cursor: text;
+            transition: all 0.3s ease;
+            min-height: 24px;
+            padding: 8px;
+            border-radius: 6px;
+            position: relative;
+        }
+
+        .editable:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            outline: 2px dashed #3498db;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .editable:focus {
+            background-color: rgba(52, 152, 219, 0.15);
+            outline: 3px solid #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Advanced Image Editing */
+        .editable-image {
+            position: relative;
+            display: inline-block;
+            cursor: move;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            overflow: visible;
+            margin: 10px;
+        }
+
+        .editable-image img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+        }
+
+        .editable-image:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            outline: 3px dashed #3498db;
+        }
+
+        .editable-image.selected {
+            outline: 3px solid #e74c3c;
+            box-shadow: 0 15px 40px rgba(231, 76, 60, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .editable-image.dragging {
+            opacity: 0.8;
+            transform: scale(0.95) rotate(2deg);
+            z-index: 1000;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        /* Enhanced Image Controls */
+        .image-controls {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            padding: 8px;
+            border-radius: 25px;
+            display: none;
+            gap: 5px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 100;
+        }
+
+        .editable-image.selected .image-controls {
+            display: flex;
+        }
+
+        .image-control-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-control-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .image-control-btn.danger {
+            color: #e74c3c;
+        }
+
+        .image-control-btn.danger:hover {
+            background: rgba(231, 76, 60, 0.2);
+        }
+
+        /* Resize Handles */
+        .resize-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #3498db;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: nw-resize;
+            display: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .resize-handle.nw { top: -6px; left: -6px; cursor: nw-resize; }
+        .resize-handle.ne { top: -6px; right: -6px; cursor: ne-resize; }
+        .resize-handle.sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+        .resize-handle.se { bottom: -6px; right: -6px; cursor: se-resize; }
+
+        .editable-image.selected .resize-handle {
+            display: block;
+        }
+
+        /* Sidebar Styling */
+        .sidebar h2 {
+            color: #ecf0f1;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #34495e;
+            font-size: 22px;
+        }
+
+        .sidebar h3 {
+            color: #bdc3c7;
+            margin: 25px 0 15px 0;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 12px 16px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: left;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+            background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+        }
+
+        .btn.danger {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+        }
+
+        .btn.success {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+        }
+
+        /* File Upload Area */
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin: 15px 0;
+            background: rgba(52, 152, 219, 0.05);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: rgba(52, 152, 219, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+            transform: scale(1.05);
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-text {
+            color: #3498db;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        /* Properties Panel */
+        .properties-panel {
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .properties-panel h4 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .property-group {
+            margin-bottom: 12px;
+        }
+
+        .property-group label {
+            display: block;
+            font-size: 12px;
+            color: #34495e;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .property-group input,
+        .property-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2c3e50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            z-index: 10001;
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            background: #27ae60;
+        }
+
+        .toast.error {
+            background: #e74c3c;
+        }
+
+        .toast.warning {
+            background: #f39c12;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #7f8c8d;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: #ecf0f1;
+            color: #e74c3c;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .editor-container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                max-height: 40vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="sidebar">
+            <h2>🎨 Enhanced Editor</h2>
+            
+            <div class="properties-panel">
+                <h4>💡 How to Use</h4>
+                <p style="color: #bdc3c7; font-size: 13px; line-height: 1.4;">
+                    1. Click "Enable Editing"<br>
+                    2. Click any text to edit<br>
+                    3. Click images to select, move, resize<br>
+                    4. Drag new images from your computer<br>
+                    5. Use tools below for advanced features
+                </p>
+            </div>
+
+            <h3>🔧 Edit Controls</h3>
+            <button onclick="toggleEditMode()" class="btn" id="editModeBtn">
+                📝 Enable Editing
+            </button>
+            <button onclick="saveChanges()" class="btn success">
+                💾 Save Changes
+            </button>
+            <button onclick="previewMode()" class="btn">
+                👁️ Preview Mode
+            </button>
+
+            <h3>🖼️ Image Tools</h3>
+            <div class="upload-area" onclick="document.getElementById('imageUpload').click()">
+                <input type="file" id="imageUpload" accept="image/*" multiple onchange="handleImageUpload(event)">
+                <div class="upload-text">📁 Browse Images</div>
+                <div class="upload-hint">Click to select or drag images here</div>
+            </div>
+            
+            <button onclick="addImageFromUrl()" class="btn">
+                🔗 Add Image from URL
+            </button>
+            <button onclick="centerAllImages()" class="btn">
+                🎯 Center All Images
+            </button>
+            <button onclick="optimizeImages()" class="btn">
+                ⚡ Optimize Images
+            </button>
+
+            <h3>📝 Text Tools</h3>
+            <button onclick="makeAllTextEditable()" class="btn">
+                ✏️ Make All Text Editable
+            </button>
+            <button onclick="formatHeadings()" class="btn">
+                🎨 Style Headings
+            </button>
+            <button onclick="fixSpacing()" class="btn">
+                📐 Fix Spacing
+            </button>
+
+            <h3>🎨 Themes</h3>
+            <button onclick="applyModernTheme()" class="btn">
+                🌟 Modern Theme
+            </button>
+            <button onclick="applyClassicTheme()" class="btn">
+                📚 Classic Theme
+            </button>
+
+            <div class="properties-panel" id="selectedProps" style="display: none;">
+                <h4>🎯 Selected Element</h4>
+                <div id="propsContent"></div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="toolbar">
+                <button onclick="toggleEditMode()" class="edit-toggle" id="editToggle">
+                    Enable Editing
+                </button>
+                <div style="flex: 1; font-size: 14px; opacity: 0.9;">
+                    <span id="editStatus">Click to start editing your website</span>
+                </div>
+                <button onclick="window.location.href='index.html'" class="btn" style="width: auto; margin: 0;">
+                    🏠 Back to Website
+                </button>
+            </div>
+
+            <div class="content-area" id="content">
+                <div style="text-align: center; padding: 50px; color: #7f8c8d;">
+                    <h2>🎨 Loading Your Website...</h2>
+                    <p>Please wait while we load your content for editing.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL Input Modal -->
+    <div class="modal" id="urlModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔗 Add Image from URL</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="property-group">
+                <label>Image URL:</label>
+                <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="property-group">
+                <label>Alt Text:</label>
+                <input type="text" id="imageAlt" placeholder="Description of the image">
+            </div>
+            <div style="margin-top: 20px;">
+                <button onclick="submitImageUrl()" class="btn success">Add Image</button>
+                <button onclick="closeModal()" class="btn" style="margin-left: 10px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log('🎨 Enhanced Visual Editor Loading...');
+        
+        let isEditMode = false;
+        let selectedElement = null;
+        let undoStack = [];
+
+        // Initialize editor
+        document.addEventListener('DOMContentLoaded', function() {
+            loadWebsiteContent();
+            setupDragAndDrop();
+            showToast('Editor loaded successfully!', 'success');
+        });
+
+        // Load website content
+        function loadWebsiteContent() {
+            fetch('index.html')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const content = doc.querySelector('main') || doc.body;
+                    
+                    document.getElementById('content').innerHTML = content.innerHTML;
+                    setupEditableElements();
+                    console.log('✅ Website content loaded');
+                })
+                .catch(error => {
+                    console.error('❌ Error loading content:', error);
+                    document.getElementById('content').innerHTML = '<div style="padding: 50px; text-align: center;"><h2>⚠️ Error Loading Content</h2><p>Could not load your website content. Please check the console for details.</p></div>';
+                });
+        }
+
+        // Setup editable elements
+        function setupEditableElements() {
+            // Make text elements editable
+            const textElements = document.querySelectorAll('#content h1, #content h2, #content h3, #content h4, #content h5, #content h6, #content p, #content span, #content div, #content a, #content li');
+            textElements.forEach(element => {
+                if (!element.classList.contains('editable') && element.children.length === 0) {
+                    element.classList.add('editable');
+                    element.setAttribute('contenteditable', 'false');
+                }
+            });
+            
+            // Setup image elements
+            const images = document.querySelectorAll('#content img');
+            images.forEach(img => setupImageElement(img));
+            
+            console.log('✅ Editable elements setup complete');
+        }
+
+        // Setup image elements with advanced features
+        function setupImageElement(img) {
+            if (img.closest('.editable-image')) return; // Already setup
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'editable-image';
+            img.parentNode.insertBefore(wrapper, img);
+            wrapper.appendChild(img);
+
+            // Add controls
+            const controls = document.createElement('div');
+            controls.className = 'image-controls';
+            controls.innerHTML = 
+                '<button class="image-control-btn" onclick="openImageProps(this)" title="Properties">⚙️</button>' +
+                '<button class="image-control-btn" onclick="replaceImage(this)" title="Replace">🔄</button>' +
+                '<button class="image-control-btn" onclick="duplicateImage(this)" title="Copy">📋</button>' +
+                '<button class="image-control-btn danger" onclick="deleteImage(this)" title="Delete">🗑️</button>';
+            wrapper.appendChild(controls);
+
+            // Add resize handles
+            ['nw', 'ne', 'sw', 'se'].forEach(direction => {
+                const handle = document.createElement('div');
+                handle.className = 'resize-handle ' + direction;
+                handle.addEventListener('mousedown', startResize);
+                wrapper.appendChild(handle);
+            });
+
+            // Add click selection
+            wrapper.addEventListener('click', selectImage);
+            
+            // Make draggable
+            wrapper.draggable = true;
+            wrapper.addEventListener('dragstart', function(e) {
+                if (!isEditMode) {
+                    e.preventDefault();
+                    return;
+                }
+                this.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            
+            wrapper.addEventListener('dragend', function(e) {
+                this.classList.remove('dragging');
+            });
+
+            console.log('🖼️ Image element enhanced:', img.src);
+        }
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const editToggle = document.getElementById('editToggle');
+            const editModeBtn = document.getElementById('editModeBtn');
+            const editStatus = document.getElementById('editStatus');
+            
+            if (isEditMode) {
+                editToggle.textContent = 'Disable Editing';
+                editToggle.classList.add('active');
+                editModeBtn.textContent = '🔒 Disable Editing';
+                editStatus.textContent = 'Editing enabled - click elements to edit';
+                enableAllEditing();
+                showToast('✅ Editing mode enabled!', 'success');
+            } else {
+                editToggle.textContent = 'Enable Editing';
+                editToggle.classList.remove('active');
+                editModeBtn.textContent = '📝 Enable Editing';
+                editStatus.textContent = 'Click to start editing';
+                disableAllEditing();
+                deselectAll();
+                showToast('⚠️ Editing mode disabled', 'warning');
+            }
+        }
+
+        // Enable/disable editing
+        function enableAllEditing() {
+            document.querySelectorAll('.editable').forEach(el => {
+                el.setAttribute('contenteditable', 'true');
+                el.addEventListener('input', saveToUndoStack);
+            });
+        }
+
+        function disableAllEditing() {
+            document.querySelectorAll('.editable').forEach(el => {
+                el.setAttribute('contenteditable', 'false');
+            });
+        }
+
+        // Image handling
+        function handleImageUpload(event) {
+            const files = event.target.files;
+            Array.from(files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        addImageToContent(e.target.result, file.name);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            event.target.value = '';
+        }
+
+        function addImageToContent(src, filename) {
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = filename || 'Uploaded image';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.margin = '20px auto';
+            
+            const content = document.getElementById('content');
+            content.appendChild(img);
+            
+            setupImageElement(img);
+            showToast('✅ Image "' + filename + '" added!', 'success');
+            saveToUndoStack();
+        }
+
+        function addImageFromUrl() {
+            document.getElementById('urlModal').classList.add('active');
+        }
+
+        function submitImageUrl() {
+            const url = document.getElementById('imageUrl').value;
+            const alt = document.getElementById('imageAlt').value;
+            
+            if (url) {
+                addImageToContent(url, alt || 'Image from URL');
+                closeModal();
+                document.getElementById('imageUrl').value = '';
+                document.getElementById('imageAlt').value = '';
+            }
+        }
+
+        // Image selection
+        function selectImage(event) {
+            if (!isEditMode) return;
+            
+            event.stopPropagation();
+            deselectAll();
+            
+            const wrapper = event.currentTarget;
+            wrapper.classList.add('selected');
+            selectedElement = wrapper;
+            
+            showImageProperties(wrapper);
+        }
+
+        function deselectAll() {
+            document.querySelectorAll('.editable-image.selected').forEach(el => {
+                el.classList.remove('selected');
+            });
+            selectedElement = null;
+            document.getElementById('selectedProps').style.display = 'none';
+        }
+
+        function showImageProperties(wrapper) {
+            const img = wrapper.querySelector('img');
+            const propsPanel = document.getElementById('selectedProps');
+            const propsContent = document.getElementById('propsContent');
+            
+            propsContent.innerHTML = 
+                '<div class="property-group">' +
+                '<label>Width (px):</label>' +
+                '<input type="number" value="' + img.offsetWidth + '" onchange="updateImageProp(\'width\', this.value + \'px\')">' +
+                '</div>' +
+                '<div class="property-group">' +
+                '<label>Alt Text:</label>' +
+                '<input type="text" value="' + img.alt + '" onchange="updateImageProp(\'alt\', this.value)">' +
+                '</div>' +
+                '<div class="property-group">' +
+                '<label>Border Radius:</label>' +
+                '<input type="range" min="0" max="50" value="0" onchange="updateImageProp(\'borderRadius\', this.value + \'px\')">' +
+                '</div>';
+            
+            propsPanel.style.display = 'block';
+        }
+
+        function updateImageProp(property, value) {
+            if (!selectedElement) return;
+            
+            const img = selectedElement.querySelector('img');
+            if (property === 'alt') {
+                img.alt = value;
+            } else {
+                img.style[property] = value;
+            }
+            saveToUndoStack();
+        }
+
+        // Image utility functions
+        function replaceImage(btn) {
+            const wrapper = btn.closest('.editable-image');
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = wrapper.querySelector('img');
+                        img.src = e.target.result;
+                        img.alt = file.name;
+                        saveToUndoStack();
+                        showToast('✅ Image replaced!', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        function duplicateImage(btn) {
+            const wrapper = btn.closest('.editable-image');
+            const img = wrapper.querySelector('img');
+            addImageToContent(img.src, img.alt + ' (copy)');
+        }
+
+        function deleteImage(btn) {
+            if (confirm('Delete this image?')) {
+                const wrapper = btn.closest('.editable-image');
+                wrapper.remove();
+                saveToUndoStack();
+                showToast('🗑️ Image deleted', 'warning');
+            }
+        }
+
+        function openImageProps(btn) {
+            const wrapper = btn.closest('.editable-image');
+            selectImage({ currentTarget: wrapper, stopPropagation: function() {} });
+        }
+
+        // Resize functionality
+        let isResizing = false;
+        let resizeData = {};
+
+        function startResize(e) {
+            if (!isEditMode) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            isResizing = true;
+            const img = e.target.closest('.editable-image').querySelector('img');
+            const rect = img.getBoundingClientRect();
+            
+            resizeData = {
+                img: img,
+                startX: e.clientX,
+                startY: e.clientY,
+                startWidth: rect.width,
+                startHeight: rect.height
+            };
+            
+            document.addEventListener('mousemove', handleResize);
+            document.addEventListener('mouseup', stopResize);
+        }
+
+        function handleResize(e) {
+            if (!isResizing || !resizeData.img) return;
+            
+            const deltaX = e.clientX - resizeData.startX;
+            const deltaY = e.clientY - resizeData.startY;
+            
+            let newWidth = resizeData.startWidth + deltaX;
+            let newHeight = resizeData.startHeight + deltaY;
+            
+            // Maintain aspect ratio
+            if (e.shiftKey) {
+                const aspectRatio = resizeData.startWidth / resizeData.startHeight;
+                newHeight = newWidth / aspectRatio;
+            }
+            
+            // Set minimum size
+            newWidth = Math.max(50, newWidth);
+            newHeight = Math.max(50, newHeight);
+            
+            resizeData.img.style.width = newWidth + 'px';
+            resizeData.img.style.height = newHeight + 'px';
+        }
+
+        function stopResize() {
+            if (isResizing) {
+                isResizing = false;
+                resizeData = {};
+                document.removeEventListener('mousemove', handleResize);
+                document.removeEventListener('mouseup', stopResize);
+                saveToUndoStack();
+            }
+        }
+
+        // Bulk operations
+        function centerAllImages() {
+            const images = document.querySelectorAll('.editable-image');
+            images.forEach(wrapper => {
+                wrapper.style.display = 'block';
+                wrapper.style.margin = '20px auto';
+                wrapper.style.textAlign = 'center';
+            });
+            saveToUndoStack();
+            showToast('🎯 All images centered!', 'success');
+        }
+
+        function optimizeImages() {
+            const images = document.querySelectorAll('.editable-image img');
+            images.forEach(img => {
+                if (img.naturalWidth > 1200) {
+                    img.style.maxWidth = '1200px';
+                    img.style.height = 'auto';
+                }
+            });
+            saveToUndoStack();
+            showToast('⚡ Images optimized!', 'success');
+        }
+
+        function makeAllTextEditable() {
+            const textElements = document.querySelectorAll('#content *');
+            textElements.forEach(el => {
+                if (el.tagName.match(/^(H[1-6]|P|SPAN|DIV|A|LI)$/) && !el.classList.contains('editable')) {
+                    el.classList.add('editable');
+                    el.setAttribute('contenteditable', isEditMode ? 'true' : 'false');
+                }
+            });
+            showToast('✏️ All text is now editable!', 'success');
+        }
+
+        function formatHeadings() {
+            const headings = document.querySelectorAll('#content h1, #content h2, #content h3, #content h4, #content h5, #content h6');
+            headings.forEach((heading, index) => {
+                heading.style.color = 'hsl(' + (index * 60) + ', 70%, 50%)';
+                heading.style.textShadow = '2px 2px 4px rgba(0,0,0,0.3)';
+            });
+            saveToUndoStack();
+            showToast('🎨 Headings formatted!', 'success');
+        }
+
+        function fixSpacing() {
+            const textElements = document.querySelectorAll('#content p, #content div');
+            textElements.forEach(el => {
+                el.style.lineHeight = '1.6';
+                el.style.marginBottom = '1em';
+            });
+            saveToUndoStack();
+            showToast('📐 Text spacing improved!', 'success');
+        }
+
+        function applyModernTheme() {
+            const content = document.getElementById('content');
+            content.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
+            content.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+            content.style.borderRadius = '15px';
+            content.style.padding = '30px';
+            saveToUndoStack();
+            showToast('🌟 Modern theme applied!', 'success');
+        }
+
+        function applyClassicTheme() {
+            const content = document.getElementById('content');
+            content.style.fontFamily = "'Times New Roman', serif";
+            content.style.background = '#ffffff';
+            content.style.borderRadius = '0';
+            content.style.padding = '20px';
+            saveToUndoStack();
+            showToast('📚 Classic theme applied!', 'success');
+        }
+
+        // Drag and drop
+        function setupDragAndDrop() {
+            const content = document.getElementById('content');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                content.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            content.addEventListener('drop', function(e) {
+                const files = e.dataTransfer.files;
+                Array.from(files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            addImageToContent(e.target.result, file.name);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+        }
+
+        // Save and undo
+        function saveToUndoStack() {
+            const content = document.getElementById('content').innerHTML;
+            undoStack.push(content);
+            if (undoStack.length > 10) {
+                undoStack.shift();
+            }
+        }
+
+        function saveChanges() {
+            const content = document.getElementById('content').innerHTML;
+            localStorage.setItem('websiteContent', content);
+            showToast('💾 Changes saved!', 'success');
+        }
+
+        function previewMode() {
+            disableAllEditing();
+            deselectAll();
+            isEditMode = false;
+            const editToggle = document.getElementById('editToggle');
+            const editModeBtn = document.getElementById('editModeBtn');
+            const editStatus = document.getElementById('editStatus');
+            
+            editToggle.textContent = 'Enable Editing';
+            editToggle.classList.remove('active');
+            editModeBtn.textContent = '📝 Enable Editing';
+            editStatus.textContent = 'Preview mode - editing disabled';
+            showToast('👁️ Preview mode activated', 'info');
+        }
+
+        // Modal functions
+        function closeModal() {
+            document.getElementById('urlModal').classList.remove('active');
+        }
+
+        // Toast notifications
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(function() { toast.classList.add('show'); }, 100);
+            setTimeout(function() {
+                toast.classList.remove('show');
+                setTimeout(function() { 
+                    if (document.body.contains(toast)) {
+                        document.body.removeChild(toast); 
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Event listeners
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeModal();
+            }
+            
+            if (!e.target.closest('.editable-image') && !e.target.closest('.sidebar')) {
+                deselectAll();
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                deselectAll();
+                closeModal();
+            }
+            
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                saveChanges();
+            }
+            
+            if (e.key === 'Delete' && selectedElement) {
+                if (confirm('Delete selected element?')) {
+                    selectedElement.remove();
+                    selectedElement = null;
+                    saveToUndoStack();
+                }
+            }
+        });
+
+        console.log('🚀 Enhanced Visual Editor Fully Loaded!');
+    </script>
+</body>
+</html>

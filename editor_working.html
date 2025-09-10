@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Visual Website Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* Editor Layout */
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .editor-sidebar {
+            width: 300px;
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-toolbar {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .editor-viewport {
+            flex: 1;
+            background: #f8f9fa;
+            position: relative;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .editor-content {
+            width: 100%;
+            min-height: calc(100vh - 120px);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Toolbar Styles */
+        .toolbar-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toolbar-btn {
+            padding: 8px 16px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar-btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+        }
+
+        .toolbar-btn.secondary {
+            background: #6c757d;
+        }
+
+        .toolbar-btn.success {
+            background: #28a745;
+        }
+
+        .toolbar-btn.danger {
+            background: #dc3545;
+        }
+
+        /* Editor Mode Toggle */
+        .edit-mode-toggle {
+            background: #ff6b35;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode-toggle.active {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        /* Sidebar Sections */
+        .sidebar-section {
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-content {
+            padding: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Context Menu Styles */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 8px 0;
+            min-width: 200px;
+            z-index: 10000;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .context-menu-item:hover {
+            background: #f8f9fa;
+        }
+
+        .context-menu-item.danger:hover {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: #eee;
+            margin: 5px 0;
+        }
+
+        /* Element Highlighting */
+        .element-highlight {
+            outline: 2px solid #007AFF !important;
+            outline-offset: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .element-highlight::after {
+            content: attr(data-element-type);
+            position: absolute;
+            top: -25px;
+            left: 0;
+            background: #007AFF;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        /* Edit Mode Overlay */
+        .edit-mode-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 123, 255, 0.05);
+            pointer-events: none;
+            z-index: 999;
+            display: none;
+        }
+
+        .edit-mode-overlay.active {
+            display: block;
+        }
+
+        /* Status Messages */
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 10001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .status-message.show {
+            transform: translateX(0);
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #9ecaed;
+        }
+
+        /* Edit Panel */
+        .edit-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            display: none;
+        }
+
+        .edit-panel-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .edit-panel h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .edit-panel .form-group {
+            margin-bottom: 20px;
+        }
+
+        .edit-panel .form-group label {
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .edit-panel .form-group input,
+        .edit-panel .form-group select,
+        .edit-panel .form-group textarea {
+            border: 2px solid #e1e5e9;
+            background: white;
+            color: #333;
+            padding: 12px;
+            border-radius: 6px;
+            transition: border-color 0.2s ease;
+        }
+
+        .edit-panel .form-group input:focus,
+        .edit-panel .form-group select:focus,
+        .edit-panel .form-group textarea:focus {
+            outline: none;
+            border-color: #007AFF;
+        }
+
+        .edit-panel-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Sidebar -->
+        <div class="editor-sidebar">
+            <h2 style="margin-bottom: 20px; color: #3498db;">🎨 Visual Editor</h2>
+            
+            <!-- Global Settings -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>🌐 Global Settings</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content">
+                    <div class="form-group">
+                        <label>Edit Mode</label>
+                        <select id="edit-mode">
+                            <option value="visual">Visual (Point & Click)</option>
+                            <option value="code">Code View</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Zoom Level</label>
+                        <select id="zoom-level">
+                            <option value="0.5">50%</option>
+                            <option value="0.75">75%</option>
+                            <option value="1" selected>100%</option>
+                            <option value="1.25">125%</option>
+                            <option value="1.5">150%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>⚡ Quick Actions</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content">
+                    <button class="toolbar-btn" style="width: 100%; margin-bottom: 10px;" onclick="addNewSection()">
+                        ➕ Add Section
+                    </button>
+                    <button class="toolbar-btn secondary" style="width: 100%; margin-bottom: 10px;" onclick="addImage()">
+                        🖼️ Add Image
+                    </button>
+                    <button class="toolbar-btn secondary" style="width: 100%; margin-bottom: 10px;" onclick="addText()">
+                        📝 Add Text
+                    </button>
+                    <button class="toolbar-btn success" style="width: 100%; margin-bottom: 10px;" onclick="saveChanges()">
+                        💾 Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Element Properties -->
+            <div class="sidebar-section" id="element-properties" style="display: none;">
+                <div class="sidebar-header">
+                    <span>🎛️ Element Properties</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content" id="properties-content">
+                    <p style="opacity: 0.7;">Select an element to edit its properties</p>
+                </div>
+            </div>
+
+            <!-- Session Info -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>👤 Session</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content">
+                    <p style="font-size: 12px; opacity: 0.8;">
+                        Logged in as: <strong>admin</strong><br>
+                        Session: <span id="session-time">30:00</span><br>
+                        Last saved: <span id="last-saved">Never</span>
+                    </p>
+                    <button class="toolbar-btn danger" style="width: 100%; margin-top: 10px;" onclick="logout()">
+                        🔓 Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-main">
+            <!-- Toolbar -->
+            <div class="editor-toolbar">
+                <div class="toolbar-group">
+                    <button class="edit-mode-toggle" id="edit-toggle" onclick="toggleEditMode()">
+                        🎯 Enable Visual Editing
+                    </button>
+                    <span id="edit-status">Click to start editing</span>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="undoAction()">↶ Undo</button>
+                    <button class="toolbar-btn" onclick="redoAction()">↷ Redo</button>
+                    <button class="toolbar-btn secondary" onclick="previewMode()">👁️ Preview</button>
+                    <button class="toolbar-btn success" onclick="publishChanges()">🚀 Publish</button>
+                </div>
+            </div>
+
+            <!-- Viewport -->
+            <div class="editor-viewport">
+                <div class="editor-content" id="editor-content">
+                    <!-- Website content will be loaded here -->
+                    <div style="padding: 40px; text-align: center; color: #666;">
+                        <h2>Loading website content...</h2>
+                        <p>Please wait while we load your website for editing.</p>
+                    </div>
+                </div>
+                <div class="edit-mode-overlay" id="edit-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" onclick="editElement()">
+            <span>✏️</span> Edit Content
+        </div>
+        <div class="context-menu-item" onclick="editStyle()">
+            <span>🎨</span> Edit Style
+        </div>
+        <div class="context-menu-item" onclick="editImage()">
+            <span>🖼️</span> Edit Image
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="duplicateElement()">
+            <span>📋</span> Duplicate
+        </div>
+        <div class="context-menu-item" onclick="moveElement()">
+            <span>↔️</span> Move
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item danger" onclick="deleteElement()">
+            <span>🗑️</span> Delete
+        </div>
+    </div>
+
+    <!-- Edit Panel -->
+    <div class="edit-panel" id="edit-panel">
+        <div class="edit-panel-content">
+            <h3 id="edit-panel-title">Edit Element</h3>
+            <div id="edit-panel-content">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+            <div class="edit-panel-buttons">
+                <button class="btn btn-secondary" onclick="closeEditPanel()">Cancel</button>
+                <button class="btn btn-primary" onclick="applyElementChanges()">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Message -->
+    <div class="status-message" id="status-message"></div>
+
+    <script>
+        // Global State
+        let editMode = false;
+        let selectedElement = null;
+        let undoStack = [];
+        let redoStack = [];
+        let sessionTimer = 1800; // 30 minutes
+        let lastSaved = null;
+        let originalContent = '';
+
+        // Initialize Editor
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEditor();
+            startSessionTimer();
+            setupEventListeners();
+            loadWebsiteContent();
+        });
+
+        function initializeEditor() {
+            // Check authentication
+            if (!checkAuthentication()) {
+                showStatus('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = 'edit.html';
+                }, 2000);
+                return;
+            }
+
+            showStatus('Visual editor initialized. Loading website content...', 'info');
+        }
+
+        async function loadWebsiteContent() {
+            try {
+                const response = await fetch('index.html');
+                const html = await response.text();
+                
+                // Parse HTML and extract body content
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Get the CSS files
+                const cssLinks = doc.querySelectorAll('link[rel="stylesheet"]');
+                const styleSheets = [];
+                
+                for (let link of cssLinks) {
+                    try {
+                        const cssResponse = await fetch(link.href);
+                        const cssText = await cssResponse.text();
+                        styleSheets.push(cssText);
+                    } catch (e) {
+                        console.warn('Could not load CSS:', link.href);
+                    }
+                }
+                
+                // Create complete content with styles
+                const contentContainer = document.getElementById('editor-content');
+                
+                // Add CSS styles
+                let styleTag = '<style>';
+                styleSheets.forEach(css => {
+                    styleTag += css;
+                });
+                styleTag += '</style>';
+                
+                // Add body content
+                const bodyContent = doc.body.innerHTML;
+                contentContainer.innerHTML = styleTag + bodyContent;
+                
+                originalContent = contentContainer.innerHTML;
+                
+                showStatus('Website content loaded successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Error loading website content:', error);
+                showStatus('Error loading website content. Using fallback.', 'error');
+                loadFallbackContent();
+            }
+        }
+
+        function loadFallbackContent() {
+            const contentContainer = document.getElementById('editor-content');
+            contentContainer.innerHTML = `
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+                    .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 20px; text-align: center; }
+                    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+                    h1 { font-size: 3rem; margin-bottom: 1rem; }
+                    p { font-size: 1.2rem; line-height: 1.6; }
+                </style>
+                <div class="hero">
+                    <div class="container">
+                        <h1>Welcome to Your Website</h1>
+                        <p>This is your editable website content. Click to edit any element!</p>
+                    </div>
+                </div>
+                <div class="container">
+                    <h2>About Section</h2>
+                    <p>This is a sample paragraph that you can edit. Click on any text to modify it.</p>
+                    <img src="https://via.placeholder.com/400x200" alt="Sample Image" style="max-width: 100%; height: auto; margin: 20px 0;">
+                </div>
+            `;
+        }
+
+        function setupEventListeners() {
+            // Hide context menu on click outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.context-menu')) {
+                    hideContextMenu();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 's':
+                            e.preventDefault();
+                            saveChanges();
+                            break;
+                        case 'z':
+                            e.preventDefault();
+                            if (e.shiftKey) {
+                                redoAction();
+                            } else {
+                                undoAction();
+                            }
+                            break;
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    closeEditPanel();
+                    deselectElement();
+                }
+            });
+
+            // Zoom control
+            document.getElementById('zoom-level').addEventListener('change', function() {
+                const zoom = this.value;
+                const content = document.getElementById('editor-content');
+                content.style.transform = `scale(${zoom})`;
+                content.style.transformOrigin = 'top left';
+            });
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const toggle = document.getElementById('edit-toggle');
+            const status = document.getElementById('edit-status');
+            const overlay = document.getElementById('edit-overlay');
+
+            if (editMode) {
+                toggle.textContent = '🎯 Visual Editing Active';
+                toggle.classList.add('active');
+                status.textContent = 'Visual editing enabled - click elements to edit';
+                overlay.classList.add('active');
+                setupEditModeEventListeners();
+                showStatus('Visual editing enabled! Click elements to edit them.', 'success');
+            } else {
+                toggle.textContent = '🎯 Enable Visual Editing';
+                toggle.classList.remove('active');
+                status.textContent = 'Visual editing disabled';
+                overlay.classList.remove('active');
+                removeEditModeEventListeners();
+                showStatus('Visual editing disabled.', 'info');
+            }
+        }
+
+        function setupEditModeEventListeners() {
+            const content = document.getElementById('editor-content');
+            
+            // Add event listeners to all editable elements
+            const editableElements = content.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, div, img, button, li');
+            
+            editableElements.forEach(element => {
+                element.addEventListener('click', handleElementClick);
+                element.addEventListener('contextmenu', handleElementRightClick);
+                element.addEventListener('mouseenter', handleElementHover);
+                element.addEventListener('mouseleave', handleElementLeave);
+                element.style.cursor = 'pointer';
+            });
+        }
+
+        function removeEditModeEventListeners() {
+            const content = document.getElementById('editor-content');
+            const editableElements = content.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, a, div, img, button, li');
+            
+            editableElements.forEach(element => {
+                element.removeEventListener('click', handleElementClick);
+                element.removeEventListener('contextmenu', handleElementRightClick);
+                element.removeEventListener('mouseenter', handleElementHover);
+                element.removeEventListener('mouseleave', handleElementLeave);
+                element.style.cursor = '';
+                element.classList.remove('element-highlight');
+                element.removeAttribute('data-element-type');
+            });
+        }
+
+        function handleElementClick(e) {
+            if (!editMode) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            selectElement(e.target);
+        }
+
+        function handleElementRightClick(e) {
+            if (!editMode) return;
+            
+            e.preventDefault();
+            e.stopPropagation();
+            
+            selectElement(e.target);
+            showContextMenu(e.clientX, e.clientY);
+        }
+
+        function handleElementHover(e) {
+            if (!editMode || e.target === selectedElement) return;
+            
+            const elementType = getElementType(e.target);
+            e.target.classList.add('element-highlight');
+            e.target.setAttribute('data-element-type', elementType);
+        }
+
+        function handleElementLeave(e) {
+            if (!editMode || e.target === selectedElement) return;
+            
+            e.target.classList.remove('element-highlight');
+            e.target.removeAttribute('data-element-type');
+        }
+
+        function selectElement(element) {
+            // Deselect previous element
+            if (selectedElement) {
+                selectedElement.classList.remove('element-highlight');
+                selectedElement.removeAttribute('data-element-type');
+            }
+
+            selectedElement = element;
+            
+            if (element) {
+                const elementType = getElementType(element);
+                element.classList.add('element-highlight');
+                element.setAttribute('data-element-type', elementType);
+                
+                updatePropertiesPanel(element);
+                showStatus(`Selected: ${elementType}`, 'info');
+            }
+        }
+
+        function deselectElement() {
+            if (selectedElement) {
+                selectedElement.classList.remove('element-highlight');
+                selectedElement.removeAttribute('data-element-type');
+                selectedElement = null;
+                
+                document.getElementById('element-properties').style.display = 'none';
+            }
+        }
+
+        function getElementType(element) {
+            const tagName = element.tagName.toLowerCase();
+            
+            const typeMap = {
+                'h1': 'Heading 1',
+                'h2': 'Heading 2',
+                'h3': 'Heading 3',
+                'h4': 'Heading 4',
+                'h5': 'Heading 5',
+                'h6': 'Heading 6',
+                'p': 'Paragraph',
+                'img': 'Image',
+                'a': 'Link',
+                'button': 'Button',
+                'div': 'Container',
+                'section': 'Section',
+                'nav': 'Navigation',
+                'header': 'Header',
+                'footer': 'Footer',
+                'span': 'Text Span',
+                'ul': 'List',
+                'ol': 'Ordered List',
+                'li': 'List Item'
+            };
+
+            return typeMap[tagName] || tagName.toUpperCase();
+        }
+
+        function updatePropertiesPanel(element) {
+            const propertiesSection = document.getElementById('element-properties');
+            const propertiesContent = document.getElementById('properties-content');
+            
+            const elementType = getElementType(element);
+            
+            let html = `<h4 style="margin-bottom: 15px; color: #3498db;">${elementType}</h4>`;
+            
+            // Element-specific properties
+            if (element.tagName.toLowerCase() === 'img') {
+                html += `
+                    <div class="form-group">
+                        <label>Image Source</label>
+                        <input type="text" id="prop-src" value="${element.src}" placeholder="Image URL">
+                    </div>
+                    <div class="form-group">
+                        <label>Alt Text</label>
+                        <input type="text" id="prop-alt" value="${element.alt || ''}" placeholder="Alternative text">
+                    </div>
+                    <div class="form-group">
+                        <label>Width</label>
+                        <input type="text" id="prop-width" value="${element.style.width || 'auto'}" placeholder="auto, 100px, 50%">
+                    </div>
+                `;
+            } else if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'span', 'a', 'button', 'li'].includes(element.tagName.toLowerCase())) {
+                html += `
+                    <div class="form-group">
+                        <label>Text Content</label>
+                        <textarea id="prop-text" rows="3" placeholder="Enter text">${element.textContent}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Font Size</label>
+                        <input type="text" id="prop-font-size" value="${element.style.fontSize || 'inherit'}" placeholder="16px, 1.2em">
+                    </div>
+                    <div class="form-group">
+                        <label>Text Color</label>
+                        <input type="color" id="prop-color" value="${getComputedStyle(element).color ? rgbToHex(getComputedStyle(element).color) : '#000000'}">
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="form-group">
+                    <label>Background Color</label>
+                    <input type="color" id="prop-bg-color" value="${getComputedStyle(element).backgroundColor ? rgbToHex(getComputedStyle(element).backgroundColor) : '#ffffff'}">
+                </div>
+                <div class="form-group">
+                    <label>Padding</label>
+                    <input type="text" id="prop-padding" value="${element.style.padding || '0'}" placeholder="10px, 10px 20px">
+                </div>
+                <button class="toolbar-btn" style="width: 100%; margin-top: 10px;" onclick="applyQuickProperties()">
+                    Apply Changes
+                </button>
+            `;
+            
+            propertiesContent.innerHTML = html;
+            propertiesSection.style.display = 'block';
+        }
+
+        function applyQuickProperties() {
+            if (!selectedElement) return;
+
+            saveToUndoStack();
+
+            // Apply image properties
+            const src = document.getElementById('prop-src')?.value;
+            const alt = document.getElementById('prop-alt')?.value;
+            const width = document.getElementById('prop-width')?.value;
+            
+            if (src !== undefined && selectedElement.tagName.toLowerCase() === 'img') {
+                selectedElement.src = src;
+            }
+            if (alt !== undefined && selectedElement.tagName.toLowerCase() === 'img') {
+                selectedElement.alt = alt;
+            }
+            if (width && width !== 'auto') {
+                selectedElement.style.width = width;
+            }
+
+            // Apply text content
+            const textContent = document.getElementById('prop-text')?.value;
+            if (textContent !== undefined) {
+                selectedElement.textContent = textContent;
+            }
+
+            // Apply styles
+            const fontSize = document.getElementById('prop-font-size')?.value;
+            const color = document.getElementById('prop-color')?.value;
+            const backgroundColor = document.getElementById('prop-bg-color')?.value;
+            const padding = document.getElementById('prop-padding')?.value;
+
+            if (fontSize && fontSize !== 'inherit') {
+                selectedElement.style.fontSize = fontSize;
+            }
+            if (color) {
+                selectedElement.style.color = color;
+            }
+            if (backgroundColor && backgroundColor !== '#ffffff') {
+                selectedElement.style.backgroundColor = backgroundColor;
+            }
+            if (padding && padding !== '0') {
+                selectedElement.style.padding = padding;
+            }
+
+            showStatus('Properties applied successfully', 'success');
+        }
+
+        function showContextMenu(x, y) {
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+        }
+
+        function hideContextMenu() {
+            document.getElementById('context-menu').style.display = 'none';
+        }
+
+        // Context Menu Actions
+        function editElement() {
+            hideContextMenu();
+            if (!selectedElement) return;
+            
+            openEditPanel();
+        }
+
+        function editStyle() {
+            hideContextMenu();
+            if (!selectedElement) return;
+            
+            openEditPanel('style');
+        }
+
+        function editImage() {
+            hideContextMenu();
+            if (!selectedElement || selectedElement.tagName.toLowerCase() !== 'img') return;
+            
+            openEditPanel('image');
+        }
+
+        function duplicateElement() {
+            hideContextMenu();
+            if (!selectedElement) return;
+            
+            saveToUndoStack();
+            
+            const clone = selectedElement.cloneNode(true);
+            selectedElement.parentNode.insertBefore(clone, selectedElement.nextSibling);
+            
+            // Re-setup event listeners for new element
+            if (editMode) {
+                setupEditModeEventListeners();
+            }
+            
+            showStatus('Element duplicated', 'success');
+        }
+
+        function moveElement() {
+            hideContextMenu();
+            if (!selectedElement) return;
+            
+            showStatus('Move mode: Click another element to move this one there', 'info');
+            // Implementation for move mode would go here
+        }
+
+        function deleteElement() {
+            hideContextMenu();
+            if (!selectedElement) return;
+            
+            if (confirm('Are you sure you want to delete this element?')) {
+                saveToUndoStack();
+                selectedElement.remove();
+                selectedElement = null;
+                
+                document.getElementById('element-properties').style.display = 'none';
+                showStatus('Element deleted', 'success');
+            }
+        }
+
+        function openEditPanel(mode = 'content') {
+            if (!selectedElement) return;
+            
+            const panel = document.getElementById('edit-panel');
+            const title = document.getElementById('edit-panel-title');
+            const content = document.getElementById('edit-panel-content');
+            
+            const elementType = getElementType(selectedElement);
+            title.textContent = `Edit ${elementType}`;
+            
+            let html = '';
+            
+            if (mode === 'image' && selectedElement.tagName.toLowerCase() === 'img') {
+                html = `
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="text" id="edit-image-src" value="${selectedElement.src}" placeholder="https://example.com/image.jpg">
+                    </div>
+                    <div class="form-group">
+                        <label>Alt Text</label>
+                        <input type="text" id="edit-image-alt" value="${selectedElement.alt || ''}" placeholder="Description of the image">
+                    </div>
+                    <div class="form-group">
+                        <label>Width</label>
+                        <input type="text" id="edit-image-width" value="${selectedElement.style.width || 'auto'}" placeholder="auto, 300px, 50%">
+                    </div>
+                    <div class="form-group">
+                        <label>Height</label>
+                        <input type="text" id="edit-image-height" value="${selectedElement.style.height || 'auto'}" placeholder="auto, 200px, 50%">
+                    </div>
+                `;
+            } else if (mode === 'style') {
+                html = `
+                    <div class="form-group">
+                        <label>Background Color</label>
+                        <input type="color" id="edit-bg-color" value="${rgbToHex(getComputedStyle(selectedElement).backgroundColor) || '#ffffff'}">
+                    </div>
+                    <div class="form-group">
+                        <label>Text Color</label>
+                        <input type="color" id="edit-text-color" value="${rgbToHex(getComputedStyle(selectedElement).color) || '#000000'}">
+                    </div>
+                    <div class="form-group">
+                        <label>Font Size</label>
+                        <input type="text" id="edit-font-size" value="${selectedElement.style.fontSize || 'inherit'}" placeholder="16px, 1.2em, 120%">
+                    </div>
+                    <div class="form-group">
+                        <label>Padding</label>
+                        <input type="text" id="edit-padding" value="${selectedElement.style.padding || '0'}" placeholder="10px, 10px 20px">
+                    </div>
+                    <div class="form-group">
+                        <label>Margin</label>
+                        <input type="text" id="edit-margin" value="${selectedElement.style.margin || '0'}" placeholder="10px, 10px 20px">
+                    </div>
+                `;
+            } else {
+                // Content editing
+                if (selectedElement.tagName.toLowerCase() === 'img') {
+                    html = `
+                        <div class="form-group">
+                            <label>Image URL</label>
+                            <input type="text" id="edit-content" value="${selectedElement.src}" placeholder="https://example.com/image.jpg">
+                        </div>
+                    `;
+                } else {
+                    html = `
+                        <div class="form-group">
+                            <label>Content</label>
+                            <textarea id="edit-content" rows="6" placeholder="Enter content">${selectedElement.textContent}</textarea>
+                        </div>
+                    `;
+                }
+                
+                html += `
+                    <div class="form-group">
+                        <label>CSS Classes</label>
+                        <input type="text" id="edit-classes" value="${selectedElement.className}" placeholder="class1 class2">
+                    </div>
+                `;
+            }
+            
+            content.innerHTML = html;
+            panel.style.display = 'flex';
+        }
+
+        function closeEditPanel() {
+            document.getElementById('edit-panel').style.display = 'none';
+        }
+
+        function applyElementChanges() {
+            if (!selectedElement) return;
+            
+            saveToUndoStack();
+            
+            // Apply based on what's in the edit panel
+            const content = document.getElementById('edit-content')?.value;
+            const classes = document.getElementById('edit-classes')?.value;
+            
+            // Image editing
+            const imageSrc = document.getElementById('edit-image-src')?.value;
+            const imageAlt = document.getElementById('edit-image-alt')?.value;
+            const imageWidth = document.getElementById('edit-image-width')?.value;
+            const imageHeight = document.getElementById('edit-image-height')?.value;
+            
+            // Style editing
+            const bgColor = document.getElementById('edit-bg-color')?.value;
+            const textColor = document.getElementById('edit-text-color')?.value;
+            const fontSize = document.getElementById('edit-font-size')?.value;
+            const padding = document.getElementById('edit-padding')?.value;
+            const margin = document.getElementById('edit-margin')?.value;
+            
+            // Apply content changes
+            if (content !== undefined) {
+                if (selectedElement.tagName.toLowerCase() === 'img') {
+                    selectedElement.src = content;
+                } else {
+                    selectedElement.textContent = content;
+                }
+            }
+            
+            if (classes !== undefined) {
+                selectedElement.className = classes;
+            }
+            
+            // Apply image changes
+            if (imageSrc) selectedElement.src = imageSrc;
+            if (imageAlt !== undefined) selectedElement.alt = imageAlt;
+            if (imageWidth && imageWidth !== 'auto') selectedElement.style.width = imageWidth;
+            if (imageHeight && imageHeight !== 'auto') selectedElement.style.height = imageHeight;
+            
+            // Apply style changes
+            if (bgColor) selectedElement.style.backgroundColor = bgColor;
+            if (textColor) selectedElement.style.color = textColor;
+            if (fontSize && fontSize !== 'inherit') selectedElement.style.fontSize = fontSize;
+            if (padding && padding !== '0') selectedElement.style.padding = padding;
+            if (margin && margin !== '0') selectedElement.style.margin = margin;
+            
+            closeEditPanel();
+            showStatus('Element updated successfully', 'success');
+        }
+
+        // Quick Actions
+        function addNewSection() {
+            saveToUndoStack();
+            
+            const content = document.getElementById('editor-content');
+            const newSection = document.createElement('section');
+            newSection.innerHTML = `
+                <div style="padding: 40px; text-align: center; background: #f8f9fa; margin: 20px 0;">
+                    <h2>New Section</h2>
+                    <p>This is a new section. Click to edit this content.</p>
+                </div>
+            `;
+            
+            content.appendChild(newSection);
+            
+            if (editMode) {
+                setupEditModeEventListeners();
+            }
+            
+            showStatus('New section added', 'success');
+        }
+
+        function addImage() {
+            const imageUrl = prompt('Enter image URL:');
+            if (!imageUrl) return;
+            
+            saveToUndoStack();
+            
+            const content = document.getElementById('editor-content');
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.alt = 'New image';
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.margin = '20px 0';
+            
+            content.appendChild(img);
+            
+            if (editMode) {
+                setupEditModeEventListeners();
+            }
+            
+            showStatus('Image added', 'success');
+        }
+
+        function addText() {
+            const text = prompt('Enter text content:');
+            if (!text) return;
+            
+            saveToUndoStack();
+            
+            const content = document.getElementById('editor-content');
+            const p = document.createElement('p');
+            p.textContent = text;
+            p.style.padding = '10px 0';
+            
+            content.appendChild(p);
+            
+            if (editMode) {
+                setupEditModeEventListeners();
+            }
+            
+            showStatus('Text added', 'success');
+        }
+
+        // Utility Functions
+        function rgbToHex(rgb) {
+            if (!rgb || rgb === 'rgba(0, 0, 0, 0)') return '#ffffff';
+            
+            const match = rgb.match(/\d+/g);
+            if (!match || match.length < 3) return '#000000';
+            
+            const r = parseInt(match[0]);
+            const g = parseInt(match[1]);
+            const b = parseInt(match[2]);
+            
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+        }
+
+        function saveToUndoStack() {
+            const content = document.getElementById('editor-content');
+            undoStack.push(content.innerHTML);
+            redoStack = []; // Clear redo stack
+            
+            if (undoStack.length > 50) {
+                undoStack.shift(); // Keep only last 50 actions
+            }
+        }
+
+        function undoAction() {
+            if (undoStack.length === 0) {
+                showStatus('Nothing to undo', 'info');
+                return;
+            }
+            
+            const content = document.getElementById('editor-content');
+            redoStack.push(content.innerHTML);
+            
+            const previousState = undoStack.pop();
+            content.innerHTML = previousState;
+            
+            if (editMode) {
+                setupEditModeEventListeners();
+            }
+            
+            showStatus('Undid last action', 'success');
+        }
+
+        function redoAction() {
+            if (redoStack.length === 0) {
+                showStatus('Nothing to redo', 'info');
+                return;
+            }
+            
+            const content = document.getElementById('editor-content');
+            undoStack.push(content.innerHTML);
+            
+            const nextState = redoStack.pop();
+            content.innerHTML = nextState;
+            
+            if (editMode) {
+                setupEditModeEventListeners();
+            }
+            
+            showStatus('Redid last action', 'success');
+        }
+
+        function saveChanges() {
+            const content = document.getElementById('editor-content');
+            
+            // In a real implementation, this would save to the server
+            localStorage.setItem('websiteContent', content.innerHTML);
+            lastSaved = new Date();
+            document.getElementById('last-saved').textContent = lastSaved.toLocaleTimeString();
+            
+            showStatus('Changes saved successfully!', 'success');
+        }
+
+        function publishChanges() {
+            if (confirm('Publish changes to live website?')) {
+                saveChanges();
+                
+                // Here you would typically send the content to your server
+                // For now, we'll just save it locally
+                
+                showStatus('Changes published successfully!', 'success');
+            }
+        }
+
+        function previewMode() {
+            const content = document.getElementById('editor-content');
+            const htmlContent = content.innerHTML;
+            
+            const previewWindow = window.open('', '_blank');
+            previewWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Website Preview</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                </head>
+                <body>
+                    ${htmlContent}
+                </body>
+                </html>
+            `);
+            previewWindow.document.close();
+            
+            showStatus('Preview opened in new tab', 'success');
+        }
+
+        // Session Management
+        function startSessionTimer() {
+            setInterval(() => {
+                sessionTimer--;
+                const minutes = Math.floor(sessionTimer / 60);
+                const seconds = sessionTimer % 60;
+                document.getElementById('session-time').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (sessionTimer <= 0) {
+                    showStatus('Session expired. Please login again.', 'error');
+                    setTimeout(() => {
+                        logout();
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        function checkAuthentication() {
+            const isAuthenticated = sessionStorage.getItem('editorAuthenticated') === 'true';
+            const authTime = parseInt(sessionStorage.getItem('authTime') || '0');
+            const now = Date.now();
+            const sessionTimeout = 30 * 60 * 1000; // 30 minutes
+
+            if (!isAuthenticated || (authTime && (now - authTime) > sessionTimeout)) {
+                sessionStorage.removeItem('editorAuthenticated');
+                sessionStorage.removeItem('authTime');
+                return false;
+            }
+
+            return true;
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout? Any unsaved changes will be lost.')) {
+                sessionStorage.removeItem('editorAuthenticated');
+                sessionStorage.removeItem('authTime');
+                window.location.href = 'edit.html';
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type} show`;
+            
+            setTimeout(() => {
+                statusDiv.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

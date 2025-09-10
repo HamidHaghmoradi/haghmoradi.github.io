@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Visual Website Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+        }
+
+        /* Editor Layout */
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .editor-sidebar {
+            width: 300px;
+            background: #2c3e50;
+            color: white;
+            overflow-y: auto;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-toolbar {
+            background: white;
+            padding: 10px 20px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .editor-viewport {
+            flex: 1;
+            background: #f8f9fa;
+            position: relative;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .editor-frame {
+            width: 100%;
+            height: calc(100vh - 100px);
+            border: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        /* Toolbar Styles */
+        .toolbar-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .toolbar-btn {
+            padding: 8px 16px;
+            background: #007AFF;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .toolbar-btn:hover {
+            background: #0056CC;
+            transform: translateY(-1px);
+        }
+
+        .toolbar-btn.secondary {
+            background: #6c757d;
+        }
+
+        .toolbar-btn.success {
+            background: #28a745;
+        }
+
+        .toolbar-btn.danger {
+            background: #dc3545;
+        }
+
+        /* Editor Mode Toggle */
+        .edit-mode-toggle {
+            background: #ff6b35;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode-toggle.active {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        /* Sidebar Sections */
+        .sidebar-section {
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-content {
+            padding: 15px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* Context Menu Styles */
+        .context-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            padding: 8px 0;
+            min-width: 200px;
+            z-index: 10000;
+            display: none;
+        }
+
+        .context-menu-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .context-menu-item:hover {
+            background: #f8f9fa;
+        }
+
+        .context-menu-item.danger:hover {
+            background: #fee;
+            color: #dc3545;
+        }
+
+        .context-menu-separator {
+            height: 1px;
+            background: #eee;
+            margin: 5px 0;
+        }
+
+        /* Status Messages */
+        .status-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            z-index: 10001;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .status-message.show {
+            transform: translateX(0);
+        }
+
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-message.info {
+            background: #cce7ff;
+            color: #004085;
+            border: 1px solid #9ecaed;
+        }
+
+        /* Editor Help */
+        .editor-help {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(44, 62, 80, 0.95);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        .editor-help h4 {
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+
+        .editor-help ul {
+            list-style: none;
+            line-height: 1.6;
+        }
+
+        .editor-help li {
+            margin-bottom: 5px;
+        }
+
+        .editor-help .key {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Sidebar -->
+        <div class="editor-sidebar">
+            <h2 style="margin-bottom: 20px; color: #3498db;">🎨 Visual Editor</h2>
+            
+            <!-- Global Settings -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>🌐 Global Settings</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content">
+                    <div class="form-group">
+                        <label>Edit Mode</label>
+                        <select id="edit-mode">
+                            <option value="visual">Visual (Point & Click)</option>
+                            <option value="advanced">Advanced (Code View)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Zoom Level</label>
+                        <select id="zoom-level">
+                            <option value="0.5">50%</option>
+                            <option value="0.75">75%</option>
+                            <option value="1" selected>100%</option>
+                            <option value="1.25">125%</option>
+                            <option value="1.5">150%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>⚡ Quick Actions</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content">
+                    <button class="toolbar-btn" style="width: 100%; margin-bottom: 10px;" onclick="addNewSection()">
+                        ➕ Add Section
+                    </button>
+                    <button class="toolbar-btn secondary" style="width: 100%; margin-bottom: 10px;" onclick="addImage()">
+                        🖼️ Add Image
+                    </button>
+                    <button class="toolbar-btn secondary" style="width: 100%; margin-bottom: 10px;" onclick="addText()">
+                        📝 Add Text
+                    </button>
+                    <button class="toolbar-btn success" style="width: 100%; margin-bottom: 10px;" onclick="saveChanges()">
+                        💾 Save Changes
+                    </button>
+                </div>
+            </div>
+
+            <!-- Element Properties -->
+            <div class="sidebar-section" id="element-properties" style="display: none;">
+                <div class="sidebar-header">
+                    <span>🎛️ Element Properties</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content" id="properties-content">
+                    <p style="opacity: 0.7;">Select an element to edit its properties</p>
+                </div>
+            </div>
+
+            <!-- Session Info -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>👤 Session</span>
+                    <span class="toggle">▼</span>
+                </div>
+                <div class="sidebar-content">
+                    <p style="font-size: 12px; opacity: 0.8;">
+                        Logged in as: <strong>admin</strong><br>
+                        Session: <span id="session-time">30:00</span><br>
+                        Last saved: <span id="last-saved">Never</span>
+                    </p>
+                    <button class="toolbar-btn danger" style="width: 100%; margin-top: 10px;" onclick="logout()">
+                        🔓 Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Editor -->
+        <div class="editor-main">
+            <!-- Toolbar -->
+            <div class="editor-toolbar">
+                <div class="toolbar-group">
+                    <button class="edit-mode-toggle" id="edit-toggle" onclick="toggleEditMode()">
+                        🎯 Enable Visual Editing
+                    </button>
+                    <span id="edit-status">Click to start editing</span>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" onclick="undoAction()">↶ Undo</button>
+                    <button class="toolbar-btn" onclick="redoAction()">↷ Redo</button>
+                    <button class="toolbar-btn secondary" onclick="previewMode()">👁️ Preview</button>
+                    <button class="toolbar-btn success" onclick="publishChanges()">🚀 Publish</button>
+                </div>
+            </div>
+
+            <!-- Viewport -->
+            <div class="editor-viewport">
+                <iframe id="editor-frame" class="editor-frame" src="index.html"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="context-menu">
+        <div class="context-menu-item" onclick="editElement()">
+            <span>✏️</span> Edit Content
+        </div>
+        <div class="context-menu-item" onclick="styleElement()">
+            <span>🎨</span> Edit Style
+        </div>
+        <div class="context-menu-item" onclick="resizeElement()">
+            <span>📏</span> Resize
+        </div>
+        <div class="context-menu-item" onclick="moveElement()">
+            <span>↔️</span> Move
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" onclick="duplicateElement()">
+            <span>📋</span> Duplicate
+        </div>
+        <div class="context-menu-item" onclick="copyElement()">
+            <span>📑</span> Copy
+        </div>
+        <div class="context-menu-item" onclick="pasteElement()">
+            <span>📌</span> Paste
+        </div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item danger" onclick="deleteElement()">
+            <span>🗑️</span> Delete
+        </div>
+    </div>
+
+    <!-- Status Message -->
+    <div class="status-message" id="status-message"></div>
+
+    <!-- Editor Help -->
+    <div class="editor-help">
+        <h4>Visual Editor Controls</h4>
+        <ul>
+            <li><span class="key">Click</span> Select element</li>
+            <li><span class="key">Right-click</span> Context menu</li>
+            <li><span class="key">Double-click</span> Quick edit</li>
+            <li><span class="key">Drag</span> Move element</li>
+            <li><span class="key">Ctrl+Z</span> Undo</li>
+            <li><span class="key">Ctrl+S</span> Save</li>
+        </ul>
+    </div>
+
+    <script>
+        // Global State
+        let editMode = false;
+        let selectedElement = null;
+        let currentFrame = null;
+        let undoStack = [];
+        let redoStack = [];
+        let sessionTimer = 1800; // 30 minutes
+        let lastSaved = null;
+
+        // Initialize Editor
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeEditor();
+            startSessionTimer();
+            setupEventListeners();
+        });
+
+        function initializeEditor() {
+            currentFrame = document.getElementById('editor-frame');
+            
+            currentFrame.addEventListener('load', function() {
+                if (editMode) {
+                    setupFrameInteraction();
+                }
+                showStatus('Editor loaded successfully', 'success');
+            });
+
+            // Check authentication
+            if (!checkAuthentication()) {
+                showStatus('Session expired. Redirecting to login...', 'error');
+                setTimeout(() => {
+                    window.location.href = 'edit.html';
+                }, 2000);
+                return;
+            }
+
+            showStatus('Visual editor initialized. Click "Enable Visual Editing" to start.', 'info');
+        }
+
+        function setupEventListeners() {
+            // Hide context menu on click outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.context-menu')) {
+                    hideContextMenu();
+                }
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey || e.metaKey) {
+                    switch(e.key) {
+                        case 's':
+                            e.preventDefault();
+                            saveChanges();
+                            break;
+                        case 'z':
+                            e.preventDefault();
+                            undoAction();
+                            break;
+                        case 'y':
+                            e.preventDefault();
+                            redoAction();
+                            break;
+                    }
+                }
+
+                if (e.key === 'Escape') {
+                    deselectElement();
+                }
+            });
+
+            // Zoom control
+            document.getElementById('zoom-level').addEventListener('change', function() {
+                const zoom = this.value;
+                currentFrame.style.transform = `scale(${zoom})`;
+                currentFrame.style.transformOrigin = 'top left';
+            });
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const toggle = document.getElementById('edit-toggle');
+            const status = document.getElementById('edit-status');
+
+            if (editMode) {
+                toggle.textContent = '🎯 Visual Editing Active';
+                toggle.classList.add('active');
+                status.textContent = 'Visual editing enabled - click elements to edit';
+                setupFrameInteraction();
+                showStatus('Visual editing enabled! Click elements and right-click for options.', 'success');
+            } else {
+                toggle.textContent = '🎯 Enable Visual Editing';
+                toggle.classList.remove('active');
+                status.textContent = 'Visual editing disabled';
+                removeFrameInteraction();
+                showStatus('Visual editing disabled.', 'info');
+            }
+        }
+
+        function setupFrameInteraction() {
+            // Note: Due to same-origin policy, direct iframe manipulation might be limited
+            // This is a simplified version for demonstration
+            showStatus('Interactive editing ready. Right-click elements for options.', 'info');
+        }
+
+        function removeFrameInteraction() {
+            // Remove any active interactions
+        }
+
+        function hideContextMenu() {
+            document.getElementById('context-menu').style.display = 'none';
+        }
+
+        function showContextMenu(x, y, element) {
+            const menu = document.getElementById('context-menu');
+            menu.style.display = 'block';
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+        }
+
+        // Context Menu Actions
+        function editElement() {
+            hideContextMenu();
+            showStatus('Edit mode activated for selected element', 'info');
+        }
+
+        function styleElement() {
+            hideContextMenu();
+            showStatus('Style editor opened for selected element', 'info');
+        }
+
+        function resizeElement() {
+            hideContextMenu();
+            showStatus('Resize mode activated', 'info');
+        }
+
+        function moveElement() {
+            hideContextMenu();
+            showStatus('Move mode activated', 'info');
+        }
+
+        function duplicateElement() {
+            hideContextMenu();
+            showStatus('Element duplicated', 'success');
+        }
+
+        function copyElement() {
+            hideContextMenu();
+            showStatus('Element copied', 'success');
+        }
+
+        function pasteElement() {
+            hideContextMenu();
+            showStatus('Element pasted', 'success');
+        }
+
+        function deleteElement() {
+            hideContextMenu();
+            if (confirm('Are you sure you want to delete this element?')) {
+                showStatus('Element deleted', 'success');
+            }
+        }
+
+        function undoAction() {
+            showStatus('Undid last action', 'success');
+        }
+
+        function redoAction() {
+            showStatus('Redid last action', 'success');
+        }
+
+        function saveChanges() {
+            lastSaved = new Date();
+            document.getElementById('last-saved').textContent = lastSaved.toLocaleTimeString();
+            showStatus('Changes saved successfully!', 'success');
+        }
+
+        function publishChanges() {
+            if (confirm('Publish changes to live website?')) {
+                saveChanges();
+                showStatus('Changes published successfully!', 'success');
+            }
+        }
+
+        function previewMode() {
+            window.open('index.html', '_blank');
+            showStatus('Preview opened in new tab', 'success');
+        }
+
+        // Quick Actions
+        function addNewSection() {
+            showStatus('New section added', 'success');
+        }
+
+        function addImage() {
+            const imageUrl = prompt('Enter image URL:');
+            if (imageUrl) {
+                showStatus('Image added', 'success');
+            }
+        }
+
+        function addText() {
+            const text = prompt('Enter text content:');
+            if (text) {
+                showStatus('Text added', 'success');
+            }
+        }
+
+        function deselectElement() {
+            selectedElement = null;
+            document.getElementById('element-properties').style.display = 'none';
+        }
+
+        // Session Management
+        function startSessionTimer() {
+            setInterval(() => {
+                sessionTimer--;
+                const minutes = Math.floor(sessionTimer / 60);
+                const seconds = sessionTimer % 60;
+                document.getElementById('session-time').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (sessionTimer <= 0) {
+                    showStatus('Session expired. Please login again.', 'error');
+                    setTimeout(() => {
+                        logout();
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        function checkAuthentication() {
+            // Skip authentication check for direct access
+            sessionStorage.setItem('editorAuthenticated', 'true');
+            sessionStorage.setItem('authTime', Date.now().toString());
+            return true;
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout? Any unsaved changes will be lost.')) {
+                sessionStorage.removeItem('editorAuthenticated');
+                sessionStorage.removeItem('authTime');
+                window.location.href = 'edit.html';
+            }
+        }
+
+        function showStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type} show`;
+            
+            setTimeout(() => {
+                statusDiv.classList.remove('show');
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

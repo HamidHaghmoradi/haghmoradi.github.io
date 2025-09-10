@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Visual Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f0f0;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 300px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .edit-toggle {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-toggle.active {
+            background: #27ae60;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(39, 174, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 20px;
+            background: white;
+            margin: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        /* Editable element styles */
+        .editable {
+            outline: none;
+            cursor: text;
+            transition: all 0.2s ease;
+            min-height: 20px;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .editable:hover {
+            background-color: rgba(52, 152, 219, 0.1);
+            outline: 2px dashed #3498db;
+        }
+
+        .editable:focus {
+            background-color: rgba(52, 152, 219, 0.2);
+            outline: 2px solid #3498db;
+        }
+
+        .editable.editing {
+            background-color: rgba(46, 204, 113, 0.1);
+            outline: 2px solid #2ecc71;
+        }
+
+        /* Image editing */
+        .editable-image {
+            border: 3px dashed transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .editable-image:hover {
+            border-color: #3498db;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+
+        .editable-image.selected {
+            border-color: #2ecc71;
+            box-shadow: 0 4px 20px rgba(46, 204, 113, 0.4);
+        }
+
+        /* Image controls */
+        .image-controls {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            background: rgba(0,0,0,0.8);
+            padding: 5px;
+            border-radius: 4px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .editable-image.selected .image-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .image-control-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .image-control-btn:hover {
+            background: #2980b9;
+        }
+
+        .image-control-btn.danger {
+            background: #e74c3c;
+        }
+
+        .image-control-btn.danger:hover {
+            background: #c0392b;
+        }
+
+        /* Drag and drop */
+        .dragging {
+            opacity: 0.7;
+            transform: rotate(2deg);
+            z-index: 1000;
+        }
+
+        .drop-zone {
+            min-height: 100px;
+            border: 2px dashed #3498db;
+            background: rgba(52, 152, 219, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #3498db;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .drop-zone.dragover {
+            background: rgba(52, 152, 219, 0.2);
+            border-color: #2980b9;
+        }
+
+        /* Resize handles */
+        .image-resize-handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border: 2px solid white;
+            border-radius: 50%;
+            cursor: nw-resize;
+            display: none;
+        }
+
+        .editable-image.selected .image-resize-handle {
+            display: block;
+        }
+
+        .resize-handle-nw { top: -5px; left: -5px; cursor: nw-resize; }
+        .resize-handle-ne { top: -5px; right: -5px; cursor: ne-resize; }
+        .resize-handle-sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+        .resize-handle-se { bottom: -5px; right: -5px; cursor: se-resize; }
+
+        /* Sidebar styles */
+        .sidebar h2 {
+            margin-bottom: 20px;
+            color: #ecf0f1;
+        }
+
+        .section {
+            margin-bottom: 25px;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .section h3 {
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255,255,255,0.6);
+        }
+
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: background 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn.success {
+            background: #27ae60;
+        }
+
+        .btn.success:hover {
+            background: #219a52;
+        }
+
+        .btn.danger {
+            background: #e74c3c;
+        }
+
+        .btn.danger:hover {
+            background: #c0392b;
+        }
+
+        /* Status messages */
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 500;
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .status.show {
+            transform: translateX(0);
+        }
+
+        .status.success {
+            background: #27ae60;
+        }
+
+        .status.error {
+            background: #e74c3c;
+        }
+
+        .status.info {
+            background: #3498db;
+        }
+
+        /* Modal for image editing */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 8px;
+            width: 500px;
+            max-width: 90%;
+        }
+
+        .modal h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .modal .form-group {
+            margin-bottom: 20px;
+        }
+
+        .modal .form-group label {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .modal .form-group input {
+            border: 2px solid #bdc3c7;
+            background: white;
+            color: #2c3e50;
+        }
+
+        .modal .form-group input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .modal .btn {
+            width: auto;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>🎨 Visual Editor</h2>
+            
+            <div class="section">
+                <h3>Edit Mode</h3>
+                <p style="font-size: 14px; opacity: 0.8; margin-bottom: 15px;">
+                    Click the button below to enable editing, then click on any text or image to modify it.
+                </p>
+                <button id="toggle-edit" class="btn">Enable Editing</button>
+            </div>
+
+            <div class="section">
+                <h3>Quick Actions</h3>
+                <button onclick="addText()" class="btn">➕ Add Text</button>
+                <button onclick="addImage()" class="btn">🖼️ Add Image</button>
+                <button onclick="addHeading()" class="btn">📝 Add Heading</button>
+                <button onclick="addSection()" class="btn">📄 Add Section</button>
+                <button onclick="saveChanges()" class="btn success">💾 Save</button>
+            </div>
+
+            <div class="section">
+                <h3>Image Tools</h3>
+                <button onclick="alignAllImages('center')" class="btn">🎯 Center All Images</button>
+                <button onclick="resizeAllImages('50%')" class="btn">📏 Resize All (50%)</button>
+                <button onclick="addBorderToImages()" class="btn">🖼️ Add Image Borders</button>
+                <button onclick="makeImagesResponsive()" class="btn">📱 Make Responsive</button>
+            </div>
+
+            <div class="section" id="element-props" style="display: none;">
+                <h3>Element Properties</h3>
+                <div id="props-content">
+                    <p style="opacity: 0.7;">Select an element to edit its properties</p>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>Session</h3>
+                <p style="font-size: 12px; opacity: 0.8;">
+                    Status: <span id="edit-status">Editing Disabled</span><br>
+                    Last saved: <span id="last-saved">Never</span>
+                </p>
+                <button onclick="logout()" class="btn danger">🔓 Logout</button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="toolbar">
+                <button id="edit-toggle" class="edit-toggle" onclick="toggleEditMode()">
+                    🎯 Click to Enable Editing
+                </button>
+                <span id="toolbar-status" style="margin-left: 20px; color: #666;">
+                    Editing is currently disabled
+                </span>
+            </div>
+
+            <div class="content-area" id="content-area">
+                <!-- Your website content will be loaded here -->
+                <div style="text-align: center; padding: 50px; color: #666;">
+                    <h2>Loading your website content...</h2>
+                    <p>Please wait while we prepare the editor.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Edit Modal -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Image</h3>
+            <div class="form-group">
+                <label>Image URL</label>
+                <input type="text" id="image-url" placeholder="https://example.com/image.jpg">
+            </div>
+            <div class="form-group">
+                <label>Alt Text</label>
+                <input type="text" id="image-alt" placeholder="Description of the image">
+            </div>
+            <div class="form-group">
+                <label>Width</label>
+                <input type="text" id="image-width" placeholder="auto, 300px, 50%">
+            </div>
+            <div class="form-group">
+                <label>Height</label>
+                <input type="text" id="image-height" placeholder="auto, 200px, 50%">
+            </div>
+            <div class="form-group">
+                <label>Position</label>
+                <select id="image-position">
+                    <option value="">Default</option>
+                    <option value="center">Center</option>
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                    <option value="float-left">Float Left</option>
+                    <option value="float-right">Float Right</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Border Radius</label>
+                <input type="text" id="image-radius" placeholder="0px, 8px, 50%">
+            </div>
+            <div class="form-group">
+                <label>Margin</label>
+                <input type="text" id="image-margin" placeholder="10px, 20px 10px">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn" onclick="closeImageModal()">Cancel</button>
+                <button class="btn success" onclick="applyImageChanges()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Message -->
+    <div id="status-msg" class="status"></div>
+
+    <script>
+        // Global variables
+        let editMode = false;
+        let selectedElement = null;
+        let currentImageElement = null;
+        let isDragging = false;
+        let isResizing = false;
+        let dragOffset = { x: 0, y: 0 };
+        let resizeStart = { x: 0, y: 0, width: 0, height: 0 };
+
+        // Initialize the editor
+        document.addEventListener('DOMContentLoaded', function() {
+            // STRICT authentication check - no bypassing allowed
+            if (!checkAuthenticationStrict()) {
+                // Immediately redirect to login without showing any content
+                redirectToLogin();
+                return;
+            }
+
+            loadWebsiteContent();
+            setupEventListeners();
+            showStatus('Secure editor loaded successfully!', 'success');
+            startSessionMonitoring();
+        });
+
+        function checkAuthenticationStrict() {
+            const isAuthenticated = sessionStorage.getItem('editorAuthenticated');
+            const authTime = parseInt(sessionStorage.getItem('authTime') || '0');
+            const authToken = sessionStorage.getItem('authToken');
+            const now = Date.now();
+            const sessionTimeout = 30 * 60 * 1000; // 30 minutes
+
+            // Multiple security checks
+            if (!isAuthenticated || isAuthenticated !== 'true') {
+                console.warn('Authentication failed: No valid session');
+                return false;
+            }
+
+            if (!authTime || (now - authTime) > sessionTimeout) {
+                console.warn('Authentication failed: Session expired');
+                sessionStorage.clear();
+                return false;
+            }
+
+            if (!authToken || !validateAuthToken(authToken)) {
+                console.warn('Authentication failed: Invalid token');
+                sessionStorage.clear();
+                return false;
+            }
+
+            // Refresh auth time for continued activity
+            sessionStorage.setItem('authTime', now.toString());
+            return true;
+        }
+
+        function validateAuthToken(token) {
+            // Simple token validation (in production, use proper JWT or server validation)
+            const expectedToken = btoa('admin:' + new Date().toDateString());
+            return token === expectedToken || token.startsWith('auth_');
+        }
+
+        function redirectToLogin() {
+            // Clear any potential auth data
+            sessionStorage.clear();
+            localStorage.removeItem('editorAccess');
+            
+            // Hide all content immediately
+            document.body.style.display = 'none';
+            
+            // Show security message
+            document.body.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #2c3e50; color: white; font-family: Arial, sans-serif;">
+                    <div style="text-align: center; padding: 40px; background: rgba(0,0,0,0.3); border-radius: 10px;">
+                        <h1>🔒 Access Denied</h1>
+                        <p style="margin: 20px 0;">This editor requires authentication.</p>
+                        <p>Redirecting to login...</p>
+                        <div style="margin-top: 20px;">
+                            <div style="width: 50px; height: 4px; background: #3498db; margin: 0 auto; animation: loading 2s infinite;"></div>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    @keyframes loading {
+                        0% { transform: scaleX(0); }
+                        50% { transform: scaleX(1); }
+                        100% { transform: scaleX(0); }
+                    }
+                </style>
+            `;
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = 'edit.html';
+            }, 2000);
+        }
+
+        function startSessionMonitoring() {
+            // Check authentication every 30 seconds
+            setInterval(() => {
+                if (!checkAuthenticationStrict()) {
+                    showStatus('Session expired. Redirecting to login...', 'error');
+                    setTimeout(redirectToLogin, 1000);
+                }
+            }, 30000);
+
+            // Also check on page visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && !checkAuthenticationStrict()) {
+                    redirectToLogin();
+                }
+            });
+        }
+
+        async function loadWebsiteContent() {
+            try {
+                // Load the actual website content
+                const response = await fetch('index.html');
+                const html = await response.text();
+                
+                // Parse the HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Get CSS files
+                const styleLinks = doc.querySelectorAll('link[rel="stylesheet"]');
+                let styles = '';
+                
+                for (let link of styleLinks) {
+                    try {
+                        const cssResponse = await fetch(link.href);
+                        const cssText = await cssResponse.text();
+                        styles += cssText + '\n';
+                    } catch (e) {
+                        console.warn('Could not load CSS:', link.href);
+                    }
+                }
+                
+                // Create the content
+                const contentArea = document.getElementById('content-area');
+                contentArea.innerHTML = `
+                    <style>${styles}</style>
+                    ${doc.body.innerHTML}
+                `;
+                
+                showStatus('Website content loaded!', 'success');
+                
+            } catch (error) {
+                console.error('Error loading content:', error);
+                loadSampleContent();
+            }
+        }
+
+        function loadSampleContent() {
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `
+                <style>
+                    .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 20px; text-align: center; border-radius: 8px; margin-bottom: 30px; }
+                    .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
+                    .hero p { font-size: 1.2rem; }
+                    .content-section { margin-bottom: 30px; }
+                    .content-section h2 { color: #2c3e50; margin-bottom: 15px; }
+                    .content-section p { line-height: 1.6; margin-bottom: 15px; }
+                    img { max-width: 100%; height: auto; border-radius: 8px; }
+                </style>
+                
+                <div class="hero">
+                    <h1>Welcome to Your Website</h1>
+                    <p>This is your editable website. Enable editing mode and click on any text to modify it!</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>About Section</h2>
+                    <p>This is a sample paragraph. When you enable editing mode, you can click directly on this text to edit it. Try it out!</p>
+                    <p>You can also edit images, headings, and add new content. The editor makes it easy to update your website content.</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>Sample Image</h2>
+                    <img src="https://picsum.photos/600/300" alt="Sample image" style="width: 100%; margin: 20px 0;">
+                    <p>Click on the image above when in edit mode to change its source, alt text, or dimensions.</p>
+                </div>
+                
+                <div class="content-section">
+                    <h2>Another Heading</h2>
+                    <p>Every piece of text you see here is editable. Just enable edit mode and start clicking!</p>
+                </div>
+            `;
+            
+            showStatus('Sample content loaded for testing', 'info');
+        }
+
+        function setupEventListeners() {
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                const modal = document.getElementById('image-modal');
+                if (event.target === modal) {
+                    closeImageModal();
+                }
+            };
+        }
+
+        function toggleEditMode() {
+            editMode = !editMode;
+            const toggleBtn = document.getElementById('edit-toggle');
+            const sidebarBtn = document.getElementById('toggle-edit');
+            const status = document.getElementById('toolbar-status');
+            const editStatus = document.getElementById('edit-status');
+
+            if (editMode) {
+                toggleBtn.textContent = '🎯 Editing Active - Click Elements to Edit';
+                toggleBtn.classList.add('active');
+                sidebarBtn.textContent = 'Disable Editing';
+                sidebarBtn.classList.add('danger');
+                status.textContent = 'Editing enabled - click on text or images to edit them';
+                editStatus.textContent = 'Editing Enabled';
+                
+                enableEditableElements();
+                showStatus('Edit mode enabled! Click on any text or image to edit it.', 'success');
+            } else {
+                toggleBtn.textContent = '🎯 Click to Enable Editing';
+                toggleBtn.classList.remove('active');
+                sidebarBtn.textContent = 'Enable Editing';
+                sidebarBtn.classList.remove('danger');
+                status.textContent = 'Editing is currently disabled';
+                editStatus.textContent = 'Editing Disabled';
+                
+                disableEditableElements();
+                showStatus('Edit mode disabled', 'info');
+            }
+        }
+
+        function enableEditableElements() {
+            const contentArea = document.getElementById('content-area');
+            
+            // Make text elements editable
+            const textElements = contentArea.querySelectorAll('h1, h2, h3, h4, h5, h6, p, span, div, a, li');
+            textElements.forEach(element => {
+                // Skip if it's a container with other elements
+                if (element.children.length === 0 || element.tagName.toLowerCase() === 'a') {
+                    element.contentEditable = true;
+                    element.classList.add('editable');
+                    
+                    element.addEventListener('focus', function() {
+                        this.classList.add('editing');
+                        selectElement(this);
+                    });
+                    
+                    element.addEventListener('blur', function() {
+                        this.classList.remove('editing');
+                    });
+                    
+                    element.addEventListener('input', function() {
+                        showStatus('Content modified', 'info');
+                    });
+                }
+            });
+            
+            // Make images editable with advanced features
+            const images = contentArea.querySelectorAll('img');
+            images.forEach(img => {
+                setupAdvancedImageEditing(img);
+            });
+        }
+
+        function disableEditableElements() {
+            const contentArea = document.getElementById('content-area');
+            
+            // Remove editable from text elements
+            const editableElements = contentArea.querySelectorAll('.editable');
+            editableElements.forEach(element => {
+                element.contentEditable = false;
+                element.classList.remove('editable', 'editing');
+            });
+            
+            // Remove image editing
+            const images = contentArea.querySelectorAll('.editable-image');
+            images.forEach(img => {
+                img.classList.remove('editable-image', 'selected');
+            });
+            
+            selectedElement = null;
+            document.getElementById('element-props').style.display = 'none';
+        }
+
+        function selectElement(element) {
+            selectedElement = element;
+            showElementProperties(element);
+        }
+
+        function setupAdvancedImageEditing(img) {
+            img.classList.add('editable-image');
+            
+            // Create image controls
+            const controls = document.createElement('div');
+            controls.className = 'image-controls';
+            controls.innerHTML = `
+                <button class="image-control-btn" onclick="editImageProperties(this.parentElement.parentElement)" title="Edit Properties">✏️</button>
+                <button class="image-control-btn" onclick="duplicateImage(this.parentElement.parentElement)" title="Duplicate">📋</button>
+                <button class="image-control-btn" onclick="moveImageMode(this.parentElement.parentElement)" title="Move">↔️</button>
+                <button class="image-control-btn danger" onclick="deleteImage(this.parentElement.parentElement)" title="Delete">🗑️</button>
+            `;
+            
+            // Create resize handles
+            const handles = ['nw', 'ne', 'sw', 'se'];
+            handles.forEach(pos => {
+                const handle = document.createElement('div');
+                handle.className = `image-resize-handle resize-handle-${pos}`;
+                handle.addEventListener('mousedown', (e) => startResize(e, img, pos));
+                img.appendChild(handle);
+            });
+            
+            img.appendChild(controls);
+            
+            // Make image draggable
+            img.draggable = true;
+            img.addEventListener('dragstart', handleImageDragStart);
+            img.addEventListener('dragend', handleImageDragEnd);
+            
+            // Click to select
+            img.addEventListener('click', function(e) {
+                e.preventDefault();
+                selectImage(this);
+            });
+            
+            // Double click to edit
+            img.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                selectImageForEditing(this);
+            });
+        }
+
+        function selectImage(img) {
+            // Remove previous selections
+            const images = document.querySelectorAll('.editable-image');
+            images.forEach(i => i.classList.remove('selected'));
+            
+            // Select current image
+            img.classList.add('selected');
+            currentImageElement = img;
+            
+            showStatus('Image selected. Use controls or double-click to edit.', 'info');
+        }
+
+        function editImageProperties(img) {
+            selectImageForEditing(img);
+        }
+
+        function duplicateImage(img) {
+            const clone = img.cloneNode(true);
+            // Remove resize handles and controls from clone
+            const handles = clone.querySelectorAll('.image-resize-handle, .image-controls');
+            handles.forEach(h => h.remove());
+            
+            // Insert after original
+            img.parentNode.insertBefore(clone, img.nextSibling);
+            
+            // Setup editing for the clone
+            setupAdvancedImageEditing(clone);
+            
+            showStatus('Image duplicated', 'success');
+        }
+
+        function moveImageMode(img) {
+            showStatus('Move mode: Drag the image to a new position', 'info');
+            img.style.cursor = 'move';
+            
+            // Add drop zones
+            addDropZones();
+        }
+
+        function deleteImage(img) {
+            if (confirm('Delete this image?')) {
+                img.remove();
+                currentImageElement = null;
+                showStatus('Image deleted', 'success');
+            }
+        }
+
+        function addDropZones() {
+            const contentArea = document.getElementById('content-area');
+            const sections = contentArea.querySelectorAll('div, section, p, h1, h2, h3, h4, h5, h6');
+            
+            sections.forEach(section => {
+                if (!section.querySelector('.drop-zone')) {
+                    const dropZone = document.createElement('div');
+                    dropZone.className = 'drop-zone';
+                    dropZone.textContent = 'Drop image here';
+                    dropZone.style.display = 'none';
+                    
+                    dropZone.addEventListener('dragover', handleDragOver);
+                    dropZone.addEventListener('drop', handleDrop);
+                    
+                    section.appendChild(dropZone);
+                }
+            });
+        }
+
+        function removeDropZones() {
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => zone.remove());
+        }
+
+        function handleImageDragStart(e) {
+            isDragging = true;
+            e.dataTransfer.setData('text/html', this.outerHTML);
+            e.dataTransfer.effectAllowed = 'move';
+            this.classList.add('dragging');
+            
+            // Show drop zones
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => zone.style.display = 'flex');
+            
+            showStatus('Dragging image. Drop in highlighted areas.', 'info');
+        }
+
+        function handleImageDragEnd(e) {
+            isDragging = false;
+            this.classList.remove('dragging');
+            this.style.cursor = 'pointer';
+            
+            // Hide drop zones
+            const dropZones = document.querySelectorAll('.drop-zone');
+            dropZones.forEach(zone => zone.style.display = 'none');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            this.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            
+            const imageHTML = e.dataTransfer.getData('text/html');
+            if (imageHTML) {
+                // Remove original image
+                const draggingImage = document.querySelector('.dragging');
+                if (draggingImage) {
+                    draggingImage.remove();
+                }
+                
+                // Insert at new location
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = imageHTML;
+                const newImg = tempDiv.firstChild;
+                
+                // Remove dragging class and setup editing
+                newImg.classList.remove('dragging');
+                this.parentNode.insertBefore(newImg, this);
+                
+                // Re-setup advanced editing
+                setupAdvancedImageEditing(newImg);
+                
+                showStatus('Image moved successfully', 'success');
+            }
+        }
+
+        function startResize(e, img, direction) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            isResizing = true;
+            const rect = img.getBoundingClientRect();
+            
+            resizeStart = {
+                x: e.clientX,
+                y: e.clientY,
+                width: rect.width,
+                height: rect.height
+            };
+            
+            document.addEventListener('mousemove', (e) => handleResize(e, img, direction));
+            document.addEventListener('mouseup', stopResize);
+            
+            img.style.cursor = getResizeCursor(direction);
+            showStatus('Resizing image. Release mouse to finish.', 'info');
+        }
+
+        function handleResize(e, img, direction) {
+            if (!isResizing) return;
+            
+            const deltaX = e.clientX - resizeStart.x;
+            const deltaY = e.clientY - resizeStart.y;
+            
+            let newWidth = resizeStart.width;
+            let newHeight = resizeStart.height;
+            
+            switch (direction) {
+                case 'se': // bottom-right
+                    newWidth = resizeStart.width + deltaX;
+                    newHeight = resizeStart.height + deltaY;
+                    break;
+                case 'sw': // bottom-left
+                    newWidth = resizeStart.width - deltaX;
+                    newHeight = resizeStart.height + deltaY;
+                    break;
+                case 'ne': // top-right
+                    newWidth = resizeStart.width + deltaX;
+                    newHeight = resizeStart.height - deltaY;
+                    break;
+                case 'nw': // top-left
+                    newWidth = resizeStart.width - deltaX;
+                    newHeight = resizeStart.height - deltaY;
+                    break;
+            }
+            
+            // Maintain aspect ratio if shift is held
+            if (e.shiftKey) {
+                const aspectRatio = resizeStart.width / resizeStart.height;
+                newHeight = newWidth / aspectRatio;
+            }
+            
+            // Set minimum size
+            newWidth = Math.max(50, newWidth);
+            newHeight = Math.max(50, newHeight);
+            
+            img.style.width = newWidth + 'px';
+            img.style.height = newHeight + 'px';
+        }
+
+        function stopResize() {
+            isResizing = false;
+            document.removeEventListener('mousemove', handleResize);
+            document.removeEventListener('mouseup', stopResize);
+            
+            if (currentImageElement) {
+                currentImageElement.style.cursor = 'pointer';
+            }
+            
+            showStatus('Image resized', 'success');
+        }
+
+        function getResizeCursor(direction) {
+            const cursors = {
+                'nw': 'nw-resize',
+                'ne': 'ne-resize',
+                'sw': 'sw-resize',
+                'se': 'se-resize'
+            };
+            return cursors[direction] || 'default';
+        }
+        function selectImageForEditing(img) {
+            currentImageElement = img;
+            
+            // Remove previous selections
+            const images = document.querySelectorAll('.editable-image');
+            images.forEach(i => i.classList.remove('selected'));
+            
+            // Select current image
+            img.classList.add('selected');
+            
+            // Fill modal with current values
+            document.getElementById('image-url').value = img.src;
+            document.getElementById('image-alt').value = img.alt || '';
+            document.getElementById('image-width').value = img.style.width || 'auto';
+            document.getElementById('image-height').value = img.style.height || 'auto';
+            document.getElementById('image-radius').value = img.style.borderRadius || '0px';
+            document.getElementById('image-margin').value = img.style.margin || '0px';
+            
+            // Set position dropdown
+            const position = getImagePosition(img);
+            document.getElementById('image-position').value = position;
+            
+            // Show modal
+            document.getElementById('image-modal').style.display = 'block';
+        }
+
+        function getImagePosition(img) {
+            const style = window.getComputedStyle(img);
+            const float = style.float;
+            const display = style.display;
+            const margin = style.margin;
+            
+            if (float === 'left') return 'float-left';
+            if (float === 'right') return 'float-right';
+            if (display === 'block' && margin.includes('auto')) return 'center';
+            
+            return '';
+        }
+
+        function showElementProperties(element) {
+            const propsSection = document.getElementById('element-props');
+            const propsContent = document.getElementById('props-content');
+            
+            const tagName = element.tagName.toLowerCase();
+            
+            let html = `
+                <p><strong>Element:</strong> ${tagName.toUpperCase()}</p>
+                <div class="form-group">
+                    <label>Text Color</label>
+                    <input type="color" id="prop-color" value="#000000" onchange="updateElementColor()">
+                </div>
+                <div class="form-group">
+                    <label>Background</label>
+                    <input type="color" id="prop-bg" value="#ffffff" onchange="updateElementBackground()">
+                </div>
+                <div class="form-group">
+                    <label>Font Size</label>
+                    <input type="text" id="prop-size" placeholder="16px, 1.2em" onchange="updateElementSize()">
+                </div>
+            `;
+            
+            propsContent.innerHTML = html;
+            propsSection.style.display = 'block';
+        }
+
+        function updateElementColor() {
+            if (selectedElement) {
+                const color = document.getElementById('prop-color').value;
+                selectedElement.style.color = color;
+                showStatus('Color updated', 'success');
+            }
+        }
+
+        function updateElementBackground() {
+            if (selectedElement) {
+                const bg = document.getElementById('prop-bg').value;
+                selectedElement.style.backgroundColor = bg;
+                showStatus('Background updated', 'success');
+            }
+        }
+
+        function updateElementSize() {
+            if (selectedElement) {
+                const size = document.getElementById('prop-size').value;
+                if (size) {
+                    selectedElement.style.fontSize = size;
+                    showStatus('Font size updated', 'success');
+                }
+            }
+        }
+
+        // Image modal functions
+        function closeImageModal() {
+            document.getElementById('image-modal').style.display = 'none';
+            if (currentImageElement) {
+                currentImageElement.classList.remove('selected');
+                currentImageElement = null;
+            }
+        }
+
+        function applyImageChanges() {
+            if (!currentImageElement) return;
+            
+            const url = document.getElementById('image-url').value;
+            const alt = document.getElementById('image-alt').value;
+            const width = document.getElementById('image-width').value;
+            const height = document.getElementById('image-height').value;
+            const position = document.getElementById('image-position').value;
+            const radius = document.getElementById('image-radius').value;
+            const margin = document.getElementById('image-margin').value;
+            
+            // Apply basic properties
+            if (url) currentImageElement.src = url;
+            if (alt) currentImageElement.alt = alt;
+            
+            // Apply dimensions
+            if (width && width !== 'auto') {
+                currentImageElement.style.width = width;
+            } else {
+                currentImageElement.style.width = 'auto';
+            }
+            
+            if (height && height !== 'auto') {
+                currentImageElement.style.height = height;
+            } else {
+                currentImageElement.style.height = 'auto';
+            }
+            
+            // Apply styling
+            if (radius && radius !== '0px') {
+                currentImageElement.style.borderRadius = radius;
+            } else {
+                currentImageElement.style.borderRadius = '';
+            }
+            
+            if (margin && margin !== '0px') {
+                currentImageElement.style.margin = margin;
+            } else {
+                currentImageElement.style.margin = '';
+            }
+            
+            // Apply positioning
+            applyImagePosition(currentImageElement, position);
+            
+            closeImageModal();
+            showStatus('Image updated successfully!', 'success');
+        }
+
+        function applyImagePosition(img, position) {
+            // Reset positioning styles
+            img.style.float = '';
+            img.style.display = '';
+            img.style.margin = '';
+            img.style.textAlign = '';
+            
+            switch (position) {
+                case 'center':
+                    img.style.display = 'block';
+                    img.style.margin = '0 auto';
+                    break;
+                case 'left':
+                    img.style.display = 'block';
+                    img.style.margin = '0 auto 0 0';
+                    break;
+                case 'right':
+                    img.style.display = 'block';
+                    img.style.margin = '0 0 0 auto';
+                    break;
+                case 'float-left':
+                    img.style.float = 'left';
+                    img.style.margin = '0 20px 10px 0';
+                    break;
+                case 'float-right':
+                    img.style.float = 'right';
+                    img.style.margin = '0 0 10px 20px';
+                    break;
+                default:
+                    // Default positioning
+                    break;
+            }
+        }
+
+        // Quick actions
+        function addText() {
+            const text = prompt('Enter text:');
+            if (!text) return;
+            
+            const contentArea = document.getElementById('content-area');
+            const p = document.createElement('p');
+            p.textContent = text;
+            p.style.margin = '15px 0';
+            contentArea.appendChild(p);
+            
+            if (editMode) {
+                p.contentEditable = true;
+                p.classList.add('editable');
+            }
+            
+            showStatus('Text added', 'success');
+        }
+
+        function addImage() {
+            const url = prompt('Enter image URL:');
+            if (!url) return;
+            
+            const contentArea = document.getElementById('content-area');
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'New image';
+            img.style.maxWidth = '100%';
+            img.style.margin = '15px 0';
+            contentArea.appendChild(img);
+            
+            if (editMode) {
+                setupAdvancedImageEditing(img);
+            }
+            
+            showStatus('Image added', 'success');
+        }
+
+        function addHeading() {
+            const text = prompt('Enter heading text:');
+            if (!text) return;
+            
+            const contentArea = document.getElementById('content-area');
+            const h2 = document.createElement('h2');
+            h2.textContent = text;
+            h2.style.margin = '20px 0 10px 0';
+            h2.style.color = '#2c3e50';
+            contentArea.appendChild(h2);
+            
+            if (editMode) {
+                h2.contentEditable = true;
+                h2.classList.add('editable');
+            }
+            
+            showStatus('Heading added', 'success');
+        }
+
+        function addSection() {
+            const contentArea = document.getElementById('content-area');
+            const section = document.createElement('div');
+            section.style.padding = '30px';
+            section.style.background = '#f8f9fa';
+            section.style.borderRadius = '8px';
+            section.style.margin = '20px 0';
+            section.innerHTML = `
+                <h2>New Section</h2>
+                <p>This is a new section. Click to edit this content when editing mode is enabled.</p>
+            `;
+            
+            contentArea.appendChild(section);
+            
+            if (editMode) {
+                const editableElements = section.querySelectorAll('h2, p');
+                editableElements.forEach(el => {
+                    el.contentEditable = true;
+                    el.classList.add('editable');
+                });
+            }
+            
+            showStatus('Section added', 'success');
+        }
+
+        // Image manipulation tools
+        function alignAllImages(alignment) {
+            const images = document.querySelectorAll('.editable-image');
+            images.forEach(img => {
+                applyImagePosition(img, alignment);
+            });
+            
+            showStatus(`All images aligned to ${alignment}`, 'success');
+        }
+
+        function resizeAllImages(size) {
+            const images = document.querySelectorAll('.editable-image');
+            images.forEach(img => {
+                img.style.width = size;
+                img.style.height = 'auto';
+            });
+            
+            showStatus(`All images resized to ${size}`, 'success');
+        }
+
+        function addBorderToImages() {
+            const images = document.querySelectorAll('.editable-image');
+            images.forEach(img => {
+                img.style.border = '2px solid #ddd';
+                img.style.borderRadius = '8px';
+                img.style.padding = '5px';
+            });
+            
+            showStatus('Borders added to all images', 'success');
+        }
+
+        function makeImagesResponsive() {
+            const images = document.querySelectorAll('.editable-image');
+            images.forEach(img => {
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.display = 'block';
+            });
+            
+            showStatus('All images made responsive', 'success');
+        }
+
+        function saveChanges() {
+            const content = document.getElementById('content-area').innerHTML;
+            localStorage.setItem('websiteContent', content);
+            
+            const now = new Date();
+            document.getElementById('last-saved').textContent = now.toLocaleTimeString();
+            
+            showStatus('Changes saved successfully!', 'success');
+        }
+
+        function logout() {
+            // Comprehensive logout with security cleanup
+            if (confirm('Logout? Any unsaved changes will be lost.')) {
+                // Clear all authentication data
+                sessionStorage.clear();
+                localStorage.removeItem('editorAccess');
+                localStorage.removeItem('lastValidAuth');
+                
+                // Log the logout
+                console.log('User logged out at:', new Date().toISOString());
+                
+                // Immediate redirect to prevent any further access
+                window.location.replace('edit.html');
+            }
+        }
+
+        // Additional security measures
+        
+        // Prevent direct access via URL manipulation
+        window.addEventListener('load', function() {
+            if (!checkAuthenticationStrict()) {
+                redirectToLogin();
+            }
+        });
+
+        // Prevent back button access after logout
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                // Page was loaded from cache
+                if (!checkAuthenticationStrict()) {
+                    redirectToLogin();
+                }
+            }
+        });
+
+        // Security header check (in production, implement on server)
+        function checkSecurityHeaders() {
+            // This would be implemented on the server side
+            // For now, we add client-side security measures
+            
+            // Prevent framing
+            if (window.top !== window.self) {
+                window.top.location = window.self.location;
+            }
+            
+            // Basic content security
+            const allowedOrigins = ['localhost', '127.0.0.1'];
+            const currentOrigin = window.location.hostname;
+            
+            if (!allowedOrigins.includes(currentOrigin) && !currentOrigin.includes('github')) {
+                console.warn('Potentially unsafe origin detected');
+            }
+        }
+
+        // Call security checks
+        checkSecurityHeaders();
+
+        // Disable right-click in production mode (optional)
+        // Uncomment the following lines if you want to disable right-click
+        /*
+        document.addEventListener('contextmenu', function(e) {
+            if (!e.target.classList.contains('editable')) {
+                e.preventDefault();
+            }
+        });
+        */
+
+        // Disable F12 and other dev tools shortcuts (optional)
+        // Uncomment if you want additional protection
+        /*
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J'))) {
+                e.preventDefault();
+                showStatus('Developer tools are disabled in this editor', 'error');
+            }
+        });
+        */
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status-msg');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type} show`;
+            
+            setTimeout(() => {
+                statusEl.classList.remove('show');
+            }, 3000);
+        }
+
+        // Add event listener to sidebar toggle button
+        document.getElementById('toggle-edit').addEventListener('click', toggleEditMode);
+    </script>
+</body>
+</html>

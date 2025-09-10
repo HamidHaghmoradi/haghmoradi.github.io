@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #005a8b;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔍 Simple Login Test</h2>
+        <div id="status" class="status info">Ready to test...</div>
+        
+        <input type="text" id="username" placeholder="Username" value="admin">
+        <input type="password" id="password" placeholder="Password" value="admin">
+        <button id="loginBtn">Test Login</button>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="testRedirect()" style="background: #28a745;">Test Direct Redirect</button>
+            <button onclick="clearStorage()" style="background: #dc3545;">Clear Storage</button>
+        </div>
+        
+        <div style="margin-top: 20px; font-size: 12px; color: #666;">
+            <strong>Debug Info:</strong>
+            <div id="debug"></div>
+        </div>
+    </div>
+
+    <script>
+        // Copy the same AUTH_CONFIG from edit.html
+        const AUTH_CONFIG = {
+            username: 'admin',
+            password: 'admin',
+            maxAttempts: 5,
+            lockoutTime: 300000
+        };
+
+        function updateStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            console.log(`STATUS: ${message}`);
+        }
+
+        function updateDebug() {
+            const debug = document.getElementById('debug');
+            const authStatus = sessionStorage.getItem('editorAuthenticated');
+            const authTime = sessionStorage.getItem('authTime');
+            const authToken = sessionStorage.getItem('authToken');
+            
+            debug.innerHTML = `
+                Authenticated: ${authStatus || 'null'}<br>
+                Auth Time: ${authTime || 'null'}<br>
+                Token: ${authToken ? authToken.substring(0, 20) + '...' : 'null'}<br>
+                Current URL: ${window.location.href}
+            `;
+        }
+
+        function authenticateUser(username, password) {
+            console.log(`Authenticating user: "${username}" with password length: ${password.length}`);
+            console.log(`Expected username: "${AUTH_CONFIG.username}"`);
+            console.log(`Expected password: "${AUTH_CONFIG.password}"`);
+            
+            const isValid = username === AUTH_CONFIG.username && password === AUTH_CONFIG.password;
+            console.log(`Authentication result: ${isValid}`);
+            
+            return isValid;
+        }
+
+        function handleLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            updateStatus('Testing authentication...', 'info');
+            console.log('=== LOGIN ATTEMPT ===');
+            console.log(`Username: "${username}"`);
+            console.log(`Password: "${password}"`);
+            
+            if (authenticateUser(username, password)) {
+                updateStatus('✅ Authentication successful!', 'success');
+                
+                // Create session
+                const authToken = 'auth_' + btoa(username + Date.now()) + '_' + Math.random().toString(36).substring(2);
+                const authTime = Date.now();
+                
+                sessionStorage.setItem('editorAuthenticated', 'true');
+                sessionStorage.setItem('authTime', authTime.toString());
+                sessionStorage.setItem('authToken', authToken);
+                sessionStorage.setItem('authUser', username);
+                
+                updateDebug();
+                
+                // Try to redirect
+                setTimeout(() => {
+                    updateStatus('Redirecting to editor...', 'info');
+                    console.log('Attempting redirect to simple_editor.html');
+                    window.location.href = 'simple_editor.html';
+                }, 1000);
+                
+            } else {
+                updateStatus('❌ Authentication failed!', 'error');
+                console.log('Authentication failed');
+            }
+        }
+
+        function testRedirect() {
+            updateStatus('Testing direct redirect...', 'info');
+            console.log('Direct redirect test');
+            window.location.href = 'simple_editor.html';
+        }
+
+        function clearStorage() {
+            sessionStorage.clear();
+            localStorage.clear();
+            updateStatus('Storage cleared', 'info');
+            updateDebug();
+        }
+
+        // Setup event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('=== TEST PAGE LOADED ===');
+            updateStatus('Test page loaded - click login to test', 'info');
+            updateDebug();
+            
+            const loginBtn = document.getElementById('loginBtn');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            
+            if (loginBtn) {
+                loginBtn.addEventListener('click', function(e) {
+                    console.log('Login button clicked');
+                    handleLogin();
+                });
+            }
+            
+            // Handle Enter key
+            [usernameInput, passwordInput].forEach(input => {
+                if (input) {
+                    input.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            console.log('Enter key pressed');
+                            handleLogin();
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
