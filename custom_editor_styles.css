@@ -10,15 +10,19 @@
     --text-color: #000000 !important;
 }
 
-/* Logo customization - updated for new aspect ratio */
-.logo-icon,
+/* Logo customization - updated for new aspect ratio with maximum specificity */
+.nav .nav-container .logo .logo-icon,
+.nav-container .logo .logo-icon,
+.logo .logo-icon,
 .nav .logo-icon,
 .nav-container .logo-icon,
 .nav-logo .logo-icon {
-    width: 5rem !important;
+    width: 6rem !important;
     height: auto !important;
-    max-height: 6rem !important;
+    max-height: 7rem !important;
     object-fit: contain !important;
+    display: block !important;
+    flex-shrink: 0 !important;
 }
 
 /* Image customizations */
