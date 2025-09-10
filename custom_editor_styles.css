@@ -10,13 +10,15 @@
     --text-color: #000000 !important;
 }
 
-/* Logo customization */
+/* Logo customization - updated for new aspect ratio */
 .logo-icon,
 .nav .logo-icon,
 .nav-container .logo-icon,
 .nav-logo .logo-icon {
-    width: 6rem !important;
-    height: 6rem !important;
+    width: 5rem !important;
+    height: auto !important;
+    max-height: 6rem !important;
+    object-fit: contain !important;
 }
 
 /* Image customizations */
