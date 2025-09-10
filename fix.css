@@ -1,3 +1,131 @@
+/* Modern Navigation Bar */
+.nav {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-bottom: 1px solid rgba(0, 122, 255, 0.1) !important;
+    box-shadow: 0 4px 24px rgba(0, 122, 255, 0.08), 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+    z-index: var(--z-fixed) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+.nav-container {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 0 var(--space-6) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    height: 5rem !important;
+}
+
+.logo {
+    font-size: 1.5rem !important;
+    font-weight: 700 !important;
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 50%, #007AFF 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    letter-spacing: -0.02em !important;
+    position: relative !important;
+}
+
+.logo:hover {
+    transform: scale(1.02) !important;
+    filter: brightness(1.1) !important;
+}
+
+.nav-menu {
+    display: flex !important;
+    gap: var(--space-2) !important;
+    align-items: center !important;
+    background: rgba(248, 249, 250, 0.8) !important;
+    padding: 0.5rem !important;
+    border-radius: 2rem !important;
+    border: 1px solid rgba(0, 122, 255, 0.15) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.nav-link {
+    color: #6D6D80 !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    font-size: 0.875rem !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    position: relative !important;
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 1.5rem !important;
+    white-space: nowrap !important;
+    background: transparent !important;
+}
+
+.nav-link:hover {
+    color: #007AFF !important;
+    background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(88, 86, 214, 0.1) 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.15) !important;
+}
+
+.nav-link.active {
+    color: #FFFFFF !important;
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%) !important;
+    box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Scroll effect */
+.nav.scrolled {
+    background: rgba(255, 255, 255, 0.98) !important;
+    box-shadow: 0 8px 32px rgba(0, 122, 255, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    border-bottom: 1px solid rgba(0, 122, 255, 0.2) !important;
+}
+
+/* Mobile toggle button */
+.nav-toggle {
+    display: none !important;
+    flex-direction: column !important;
+    cursor: pointer !important;
+    gap: 0.25rem !important;
+    padding: 0.5rem !important;
+    border-radius: 0.5rem !important;
+    background: rgba(248, 249, 250, 0.8) !important;
+    border: 1px solid rgba(0, 122, 255, 0.15) !important;
+    transition: all 0.3s ease !important;
+}
+
+.nav-toggle:hover {
+    background: rgba(0, 122, 255, 0.1) !important;
+    transform: scale(1.05) !important;
+}
+
+.bar {
+    width: 1.25rem !important;
+    height: 2px !important;
+    background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%) !important;
+    transition: all 0.3s ease !important;
+    border-radius: 1px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .nav-menu {
+        background: rgba(255, 255, 255, 0.95) !important;
+        border: 1px solid rgba(0, 122, 255, 0.2) !important;
+        box-shadow: 0 8px 32px rgba(0, 122, 255, 0.15) !important;
+    }
+    
+    .nav-toggle {
+        display: flex !important;
+    }
+}
+
 /* Temporary fix for layout issues */
 .floating-shapes {
     display: none !important;
